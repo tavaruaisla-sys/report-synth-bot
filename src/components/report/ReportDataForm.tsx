@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Upload, Sparkles, FileText, Link, BarChart2, Image } from "lucide-react";
+import { Plus, Trash2, Upload, Sparkles, FileText, Link, BarChart2, Image, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ReportFormData, SocialMediaStat, CounterContentItem, ProductionLink } from "@/lib/pdf/types";
+import { ReportFormData, ReportData, SocialMediaStat, CounterContentItem, ProductionLink } from "@/lib/pdf/types";
+import ReportPreview from "./ReportPreview";
 
 interface ReportDataFormProps {
   isOpen: boolean;
@@ -27,6 +28,8 @@ interface ReportDataFormProps {
   isGeneratingAiSummary: boolean;
   onGenerateReport: () => void;
   isGenerating: boolean;
+  previewData: ReportData;
+  onUpdateScreenshotPreview: (file: File, type: 'before' | 'after') => void;
 }
 
 const ReportDataForm = ({
@@ -45,6 +48,8 @@ const ReportDataForm = ({
   isGeneratingAiSummary,
   onGenerateReport,
   isGenerating,
+  previewData,
+  onUpdateScreenshotPreview,
 }: ReportDataFormProps) => {
   // Temporary state for new items
   const [newSocialStat, setNewSocialStat] = useState<Partial<SocialMediaStat>>({
@@ -73,6 +78,9 @@ const ReportDataForm = ({
     const file = e.target.files?.[0];
     if (file) {
       onUpdateFormData({ [field]: file });
+      // Update preview
+      const type = field === 'serpScreenshotBefore' ? 'before' : 'after';
+      onUpdateScreenshotPreview(file, type);
     }
   };
 
@@ -126,11 +134,15 @@ const ReportDataForm = ({
         
         <ScrollArea className="max-h-[60vh]">
           <Tabs defaultValue="basic" className="p-6 pt-4">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="screenshots">Screenshots</TabsTrigger>
               <TabsTrigger value="social">Social Media</TabsTrigger>
               <TabsTrigger value="content">Content Links</TabsTrigger>
+              <TabsTrigger value="preview" className="flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                Preview
+              </TabsTrigger>
             </TabsList>
             
             {/* Basic Info Tab */}
@@ -509,6 +521,23 @@ const ReportDataForm = ({
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+            
+            {/* Preview Tab */}
+            <TabsContent value="preview" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    Preview slide PDF yang akan di-generate
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Scroll untuk melihat semua slide
+                  </p>
+                </div>
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <ReportPreview data={previewData} />
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         </ScrollArea>

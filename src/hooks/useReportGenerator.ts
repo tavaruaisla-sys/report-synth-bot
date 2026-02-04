@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ReportData, ReportFormData, defaultReportFormData, SocialMediaStat, CounterContentItem, ProductionLink } from '@/lib/pdf/types';
 import { ReportPDFGenerator, fileToBase64 } from '@/lib/pdf/ReportPDFGenerator';
 import { SearchResult, SearchStats } from '@/lib/api/google-search';
@@ -26,6 +26,62 @@ export function useReportGenerator({
     brandName: keywords[0] || '',
   });
   const [aiSummary, setAiSummary] = useState<string>('');
+  const [screenshotPreviews, setScreenshotPreviews] = useState<{
+    before?: string;
+    after?: string;
+  }>({});
+
+  // Build preview data for the preview component
+  const previewData: ReportData = useMemo(() => ({
+    reportTitle: formData.reportTitle,
+    brandName: formData.brandName || 'Brand Name',
+    updateDate: new Date().toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }),
+    keywords,
+    negativeKeywords,
+    searchResults: searchResults.map(r => ({
+      title: r.title,
+      url: r.url,
+      snippet: r.description,
+      source: r.source,
+      sentiment: r.sentiment as 'positive' | 'negative' | 'neutral',
+      matchedKeywords: r.matchedNegativeKeywords,
+    })),
+    sentimentStats: searchStats || {
+      totalResults: 0,
+      negativeFound: 0,
+      positiveFound: 0,
+      neutralFound: 0,
+      sentimentScore: 100,
+    },
+    newsStatus: formData.newsStatus,
+    newsDescription: formData.newsDescription,
+    socialMediaStatus: formData.socialMediaStatus,
+    socialMediaDescription: formData.socialMediaDescription,
+    serpScreenshotBefore: screenshotPreviews.before,
+    serpScreenshotAfter: screenshotPreviews.after,
+    serpCaptions: {
+      before: formData.serpCaptionBefore,
+      after: formData.serpCaptionAfter,
+    },
+    aiSummary: aiSummary || undefined,
+    socialMediaStats: formData.socialMediaStats,
+    counterContent: formData.counterContent,
+    newsProduction: formData.newsProduction,
+    socialMediaProduction: formData.socialMediaProduction,
+  }), [formData, keywords, negativeKeywords, searchResults, searchStats, aiSummary, screenshotPreviews]);
+
+  // Handle screenshot preview updates
+  const updateScreenshotPreview = async (file: File, type: 'before' | 'after') => {
+    const base64 = await fileToBase64(file);
+    setScreenshotPreviews(prev => ({
+      ...prev,
+      [type]: base64,
+    }));
+  };
 
   const updateFormData = (updates: Partial<ReportFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -230,5 +286,7 @@ export function useReportGenerator({
     isGeneratingAiSummary,
     generateReport,
     isGenerating,
+    previewData,
+    updateScreenshotPreview,
   };
 }

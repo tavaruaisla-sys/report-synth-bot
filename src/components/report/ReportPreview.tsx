@@ -1,0 +1,321 @@
+import { ReportData, REPORT_COLORS } from "@/lib/pdf/types";
+import { TrendingUp, TrendingDown, AlertCircle, FileText, Sparkles } from "lucide-react";
+
+interface ReportPreviewProps {
+  data: ReportData;
+}
+
+const ReportPreview = ({ data }: ReportPreviewProps) => {
+  return (
+    <div className="space-y-4">
+      {/* Slide 1: Cover */}
+      <SlideWrapper>
+        <div 
+          className="h-full flex flex-col items-center justify-center text-white"
+          style={{ backgroundColor: REPORT_COLORS.primary }}
+        >
+          <div 
+            className="absolute top-0 left-0 right-0 h-1"
+            style={{ backgroundColor: REPORT_COLORS.accent }}
+          />
+          <p className="text-sm font-medium tracking-widest mb-4 opacity-80">
+            {data.brandName.toUpperCase()}
+          </p>
+          <h1 className="text-4xl font-bold mb-2">{data.reportTitle}</h1>
+          <p className="text-sm opacity-70">Brand Monitoring & Reputation Report</p>
+          <p className="text-xs mt-8 opacity-60">Update: {data.updateDate}</p>
+        </div>
+      </SlideWrapper>
+
+      {/* Slide 2: Executive Summary */}
+      <SlideWrapper>
+        <SlideHeader title="EXECUTIVE SUMMARY" pageNum={2} />
+        <div className="p-4 grid grid-cols-2 gap-4">
+          {/* News Status */}
+          <div className="bg-muted/50 rounded-lg p-3">
+            <h3 className="font-semibold text-sm mb-2" style={{ color: REPORT_COLORS.primary }}>
+              NEWS / PEMBERITAAN
+            </h3>
+            <StatusBadge status={data.newsStatus} />
+            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+              {data.newsDescription || 'No description provided'}
+            </p>
+          </div>
+          
+          {/* Social Media Status */}
+          <div className="bg-muted/50 rounded-lg p-3">
+            <h3 className="font-semibold text-sm mb-2" style={{ color: REPORT_COLORS.primary }}>
+              SOCIAL MEDIA
+            </h3>
+            <SentimentBadge status={data.socialMediaStatus} />
+            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+              {data.socialMediaDescription || 'No description provided'}
+            </p>
+          </div>
+        </div>
+        
+        {/* Stats */}
+        <div className="px-4 pb-4">
+          <h4 className="text-xs font-semibold mb-2" style={{ color: REPORT_COLORS.primary }}>
+            SENTIMENT ANALYSIS
+          </h4>
+          <div className="grid grid-cols-4 gap-2">
+            <StatCard 
+              label="Total" 
+              value={data.sentimentStats.totalResults} 
+              color={REPORT_COLORS.accent} 
+            />
+            <StatCard 
+              label="Negative" 
+              value={data.sentimentStats.negativeFound} 
+              color={REPORT_COLORS.negative} 
+            />
+            <StatCard 
+              label="Positive" 
+              value={data.sentimentStats.positiveFound} 
+              color={REPORT_COLORS.positive} 
+            />
+            <StatCard 
+              label="Score" 
+              value={`${data.sentimentStats.sentimentScore}%`} 
+              color={REPORT_COLORS.primary} 
+            />
+          </div>
+        </div>
+      </SlideWrapper>
+
+      {/* Slide 3: Results Divider */}
+      <SlideWrapper>
+        <div 
+          className="h-full flex flex-col items-center justify-center text-white"
+          style={{ backgroundColor: REPORT_COLORS.primary }}
+        >
+          <div 
+            className="w-16 h-1 mb-4"
+            style={{ backgroundColor: REPORT_COLORS.accent }}
+          />
+          <h2 className="text-3xl font-bold">RESULTS</h2>
+          <p className="text-sm opacity-70 mt-2">Detailed search analysis and findings</p>
+        </div>
+      </SlideWrapper>
+
+      {/* Slide 4: Before Screenshot */}
+      <SlideWrapper>
+        <SlideHeader title="GOOGLE SEARCH - BEFORE" pageNum={4} />
+        <div className="p-4 flex-1 flex flex-col">
+          <div className="flex-1 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
+            {data.serpScreenshotBefore ? (
+              <img 
+                src={data.serpScreenshotBefore} 
+                alt="Before screenshot" 
+                className="max-h-full max-w-full object-contain"
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">No screenshot uploaded</p>
+            )}
+          </div>
+          <p className="text-xs text-center text-muted-foreground mt-2 italic">
+            {data.serpCaptions?.before || 'Before optimization'}
+          </p>
+        </div>
+      </SlideWrapper>
+
+      {/* Slide 5: After Screenshot */}
+      <SlideWrapper>
+        <SlideHeader title="GOOGLE SEARCH - AFTER" pageNum={5} />
+        <div className="p-4 flex-1 flex flex-col">
+          <div className="flex-1 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
+            {data.serpScreenshotAfter ? (
+              <img 
+                src={data.serpScreenshotAfter} 
+                alt="After screenshot" 
+                className="max-h-full max-w-full object-contain"
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">No screenshot uploaded</p>
+            )}
+          </div>
+          <p className="text-xs text-center text-muted-foreground mt-2 italic">
+            {data.serpCaptions?.after || 'After optimization'}
+          </p>
+        </div>
+      </SlideWrapper>
+
+      {/* Slide 6: AI Summary */}
+      <SlideWrapper>
+        <SlideHeader title="AI ANALYSIS SUMMARY" pageNum={6} />
+        <div className="p-4 flex-1">
+          {data.aiSummary ? (
+            <div className="text-xs leading-relaxed whitespace-pre-wrap">
+              {data.aiSummary}
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center text-muted-foreground">
+                <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">AI summary not generated</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </SlideWrapper>
+
+      {/* Slide 7: Appendix Divider */}
+      <SlideWrapper>
+        <div 
+          className="h-full flex flex-col items-center justify-center text-white"
+          style={{ backgroundColor: REPORT_COLORS.primary }}
+        >
+          <div 
+            className="w-16 h-1 mb-4"
+            style={{ backgroundColor: REPORT_COLORS.accent }}
+          />
+          <h2 className="text-3xl font-bold">APPENDIX</h2>
+          <p className="text-sm opacity-70 mt-2">Data summary and production links</p>
+        </div>
+      </SlideWrapper>
+
+      {/* Slide 8: Data Summary */}
+      <SlideWrapper>
+        <SlideHeader title="DATA SUMMARY" pageNum={8} />
+        <div className="p-4">
+          <h4 className="text-xs font-semibold mb-2" style={{ color: REPORT_COLORS.primary }}>
+            Keyword Analysis
+          </h4>
+          <div className="border rounded-lg overflow-hidden">
+            <div 
+              className="grid grid-cols-3 text-xs font-medium text-white p-2"
+              style={{ backgroundColor: REPORT_COLORS.primary }}
+            >
+              <span>Keyword</span>
+              <span>Type</span>
+              <span>Results</span>
+            </div>
+            {data.keywords.slice(0, 3).map((keyword, i) => (
+              <div key={i} className={`grid grid-cols-3 text-xs p-2 ${i % 2 === 0 ? 'bg-muted/30' : ''}`}>
+                <span>{keyword}</span>
+                <span className="text-green-600">Brand</span>
+                <span>-</span>
+              </div>
+            ))}
+            {data.negativeKeywords.slice(0, 3).map((keyword, i) => (
+              <div key={i} className={`grid grid-cols-3 text-xs p-2 ${(data.keywords.slice(0, 3).length + i) % 2 === 0 ? 'bg-muted/30' : ''}`}>
+                <span>{keyword}</span>
+                <span className="text-red-600">Negative</span>
+                <span>-</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </SlideWrapper>
+
+      {/* Optional: Social Media Stats */}
+      {data.socialMediaStats.length > 0 && (
+        <SlideWrapper>
+          <SlideHeader title="SOCIAL MEDIA STATISTICS" pageNum={9} />
+          <div className="p-4 grid grid-cols-2 gap-2">
+            {data.socialMediaStats.slice(0, 4).map((stat, i) => (
+              <div key={i} className="bg-muted/30 rounded-lg p-2">
+                <h5 className="font-medium text-xs" style={{ color: REPORT_COLORS.primary }}>
+                  {stat.platform}
+                </h5>
+                <div className="grid grid-cols-2 gap-1 mt-1 text-xs text-muted-foreground">
+                  <span>Views: {stat.views.toLocaleString()}</span>
+                  <span>Likes: {stat.likes.toLocaleString()}</span>
+                  <span>Comments: {stat.comments.toLocaleString()}</span>
+                  <span>Shares: {stat.shares.toLocaleString()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SlideWrapper>
+      )}
+
+      {/* Optional: Counter Content */}
+      {data.counterContent.length > 0 && (
+        <SlideWrapper>
+          <SlideHeader title="COUNTER NARRATIVE CONTENT" pageNum={10} />
+          <div className="p-4 space-y-2">
+            {data.counterContent.slice(0, 5).map((item, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span 
+                  className="text-xs px-2 py-0.5 rounded text-white"
+                  style={{ 
+                    backgroundColor: item.type === 'news' ? REPORT_COLORS.accent : 
+                                    item.type === 'social' ? REPORT_COLORS.positive : REPORT_COLORS.neutral 
+                  }}
+                >
+                  {item.type.toUpperCase()}
+                </span>
+                <span className="text-xs truncate flex-1">{item.title}</span>
+              </div>
+            ))}
+          </div>
+        </SlideWrapper>
+      )}
+    </div>
+  );
+};
+
+// Helper Components
+const SlideWrapper = ({ children }: { children: React.ReactNode }) => (
+  <div className="relative bg-background border border-border rounded-lg overflow-hidden shadow-sm" style={{ aspectRatio: '16/9' }}>
+    <div className="absolute inset-0 flex flex-col">
+      {children}
+    </div>
+  </div>
+);
+
+const SlideHeader = ({ title, pageNum }: { title: string; pageNum: number }) => (
+  <div 
+    className="flex items-center justify-between px-4 py-2 text-white"
+    style={{ backgroundColor: REPORT_COLORS.primary }}
+  >
+    <span className="font-semibold text-sm">{title}</span>
+    <span className="text-xs opacity-70">{pageNum}</span>
+  </div>
+);
+
+const StatusBadge = ({ status }: { status: 'recovery' | 'monitoring' | 'crisis' }) => {
+  const colors = {
+    recovery: REPORT_COLORS.positive,
+    monitoring: REPORT_COLORS.neutral,
+    crisis: REPORT_COLORS.negative,
+  };
+  return (
+    <span 
+      className="inline-block px-2 py-0.5 rounded text-xs text-white font-medium"
+      style={{ backgroundColor: colors[status] }}
+    >
+      {status.toUpperCase()}
+    </span>
+  );
+};
+
+const SentimentBadge = ({ status }: { status: 'positive' | 'neutral' | 'negative' }) => {
+  const colors = {
+    positive: REPORT_COLORS.positive,
+    neutral: REPORT_COLORS.neutral,
+    negative: REPORT_COLORS.negative,
+  };
+  return (
+    <span 
+      className="inline-block px-2 py-0.5 rounded text-xs text-white font-medium"
+      style={{ backgroundColor: colors[status] }}
+    >
+      {status.toUpperCase()}
+    </span>
+  );
+};
+
+const StatCard = ({ label, value, color }: { label: string; value: number | string; color: string }) => (
+  <div 
+    className="rounded-lg p-2 text-center text-white"
+    style={{ backgroundColor: color }}
+  >
+    <p className="text-lg font-bold">{value}</p>
+    <p className="text-xs opacity-80">{label}</p>
+  </div>
+);
+
+export default ReportPreview;
