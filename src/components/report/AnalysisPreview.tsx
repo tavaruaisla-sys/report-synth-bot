@@ -11,6 +11,7 @@ interface AnalysisPreviewProps {
   onGenerateReport: () => void;
   isLoading?: boolean;
   searchStats?: SearchStats | null;
+  onOpenReportModal?: () => void;
 }
 
 const AnalysisPreview = ({ 
@@ -19,7 +20,8 @@ const AnalysisPreview = ({
   urlCount, 
   onGenerateReport,
   isLoading = false,
-  searchStats
+  searchStats,
+  onOpenReportModal
 }: AnalysisPreviewProps) => {
   const isReady = keywords.length > 0;
 
@@ -112,6 +114,7 @@ const AnalysisPreview = ({
             size="lg" 
             variant="default"
             disabled={isLoading}
+            onClick={onOpenReportModal}
           >
             <FileText className="mr-2 h-5 w-5" />
             Generate Report PDF

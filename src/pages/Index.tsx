@@ -6,8 +6,10 @@ import SocialMediaInput from "@/components/report/SocialMediaInput";
 import SearchSourceTabs from "@/components/report/SearchSourceTabs";
 import AnalysisPreview from "@/components/report/AnalysisPreview";
 import SearchResults from "@/components/report/SearchResults";
+import ReportDataForm from "@/components/report/ReportDataForm";
 import { useToast } from "@/hooks/use-toast";
 import { useGoogleSearch } from "@/hooks/useGoogleSearch";
+import { useReportGenerator } from "@/hooks/useReportGenerator";
 
 interface SocialMediaUrl {
   id: string;
@@ -31,6 +33,15 @@ const Index = () => {
   const [sources, setSources] = useState({
     googleAll: true,
     googleNews: true,
+  });
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  
+  // Report generator hook
+  const reportGenerator = useReportGenerator({
+    keywords,
+    negativeKeywords,
+    searchResults: results,
+    searchStats: stats,
   });
 
   const handleGenerateReport = async () => {
@@ -131,6 +142,7 @@ const Index = () => {
               onGenerateReport={handleGenerateReport}
               isLoading={isLoading}
               searchStats={stats}
+              onOpenReportModal={() => setIsReportModalOpen(true)}
             />
           </div>
         </div>
@@ -147,6 +159,25 @@ const Index = () => {
         )}
         </div>
       </main>
+
+      {/* Report Data Form Modal */}
+      <ReportDataForm
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        formData={reportGenerator.formData}
+        onUpdateFormData={reportGenerator.updateFormData}
+        onAddSocialMediaStat={reportGenerator.addSocialMediaStat}
+        onRemoveSocialMediaStat={reportGenerator.removeSocialMediaStat}
+        onAddCounterContent={reportGenerator.addCounterContent}
+        onRemoveCounterContent={reportGenerator.removeCounterContent}
+        onAddProductionLink={reportGenerator.addProductionLink}
+        onRemoveProductionLink={reportGenerator.removeProductionLink}
+        aiSummary={reportGenerator.aiSummary}
+        onGenerateAiSummary={reportGenerator.generateAiSummary}
+        isGeneratingAiSummary={reportGenerator.isGeneratingAiSummary}
+        onGenerateReport={reportGenerator.generateReport}
+        isGenerating={reportGenerator.isGenerating}
+      />
 
       {/* Footer */}
       <footer className="border-t border-border bg-card py-6">
