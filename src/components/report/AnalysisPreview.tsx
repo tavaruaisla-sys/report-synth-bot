@@ -1,8 +1,8 @@
-import { BarChart3, TrendingDown, TrendingUp, FileText, AlertCircle } from "lucide-react";
+import { BarChart3, TrendingDown, TrendingUp, FileText, AlertCircle, Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { SearchStats } from "@/lib/api/google-search";
 
 interface AnalysisPreviewProps {
   keywords: string[];
@@ -10,6 +10,7 @@ interface AnalysisPreviewProps {
   urlCount: number;
   onGenerateReport: () => void;
   isLoading?: boolean;
+  searchStats?: SearchStats | null;
 }
 
 const AnalysisPreview = ({ 
@@ -17,17 +18,18 @@ const AnalysisPreview = ({
   negativeKeywords, 
   urlCount, 
   onGenerateReport,
-  isLoading = false 
+  isLoading = false,
+  searchStats
 }: AnalysisPreviewProps) => {
   const isReady = keywords.length > 0;
 
-  // Mock analysis data - will be replaced with real data
-  const mockStats = {
-    totalResults: 156,
-    negativeFound: 12,
-    positiveFound: 89,
-    neutralFound: 55,
-    sentimentScore: 72,
+  // Use real stats if available, otherwise show placeholder
+  const stats = searchStats || {
+    totalResults: 0,
+    negativeFound: 0,
+    positiveFound: 0,
+    neutralFound: 0,
+    sentimentScore: 100,
   };
 
   return (
@@ -59,28 +61,36 @@ const AnalysisPreview = ({
         </div>
 
         {/* Sentiment Preview */}
-        {isReady && (
+        {(isReady || searchStats) && (
           <div className="space-y-4 rounded-lg border border-border p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Sentiment Score</span>
-              <span className="text-sm text-positive font-semibold">{mockStats.sentimentScore}%</span>
+              <span className={`text-sm font-semibold ${stats.sentimentScore >= 70 ? 'text-positive' : stats.sentimentScore >= 40 ? 'text-accent' : 'text-negative'}`}>
+                {stats.sentimentScore}%
+              </span>
             </div>
-            <Progress value={mockStats.sentimentScore} className="h-2" />
+            <Progress value={stats.sentimentScore} className="h-2" />
             
             <div className="grid grid-cols-3 gap-2 pt-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-positive" />
-                <span className="text-xs text-muted-foreground">Positif: {mockStats.positiveFound}</span>
+                <span className="text-xs text-muted-foreground">Positif: {stats.positiveFound}</span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-4 w-4 text-negative" />
-                <span className="text-xs text-muted-foreground">Negatif: {mockStats.negativeFound}</span>
+                <span className="text-xs text-muted-foreground">Negatif: {stats.negativeFound}</span>
               </div>
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Netral: {mockStats.neutralFound}</span>
+                <span className="text-xs text-muted-foreground">Netral: {stats.neutralFound}</span>
               </div>
             </div>
+
+            {searchStats && (
+              <div className="pt-2 border-t border-border text-xs text-muted-foreground">
+                Total hasil: {stats.totalResults}
+              </div>
+            )}
           </div>
         )}
 
@@ -92,9 +102,21 @@ const AnalysisPreview = ({
           disabled={!isReady || isLoading}
           onClick={onGenerateReport}
         >
-          <FileText className="mr-2 h-5 w-5" />
-          {isLoading ? "Memproses..." : "Generate Report PDF"}
+          <Search className="mr-2 h-5 w-5" />
+          {isLoading ? "Mencari..." : searchStats ? "Cari Ulang" : "Mulai Analisis"}
         </Button>
+
+        {searchStats && (
+          <Button 
+            className="w-full" 
+            size="lg" 
+            variant="default"
+            disabled={isLoading}
+          >
+            <FileText className="mr-2 h-5 w-5" />
+            Generate Report PDF
+          </Button>
+        )}
 
         {!isReady && (
           <p className="text-center text-sm text-muted-foreground">

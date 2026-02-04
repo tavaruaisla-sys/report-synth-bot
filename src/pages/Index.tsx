@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Sparkles, ArrowRight, FileSliders } from "lucide-react";
+import { Sparkles, FileSliders } from "lucide-react";
 import Header from "@/components/layout/Header";
 import KeywordInput from "@/components/report/KeywordInput";
 import SocialMediaInput from "@/components/report/SocialMediaInput";
 import SearchSourceTabs from "@/components/report/SearchSourceTabs";
 import AnalysisPreview from "@/components/report/AnalysisPreview";
+import SearchResults from "@/components/report/SearchResults";
 import { useToast } from "@/hooks/use-toast";
+import { useGoogleSearch } from "@/hooks/useGoogleSearch";
 
 interface SocialMediaUrl {
   id: string;
@@ -15,6 +17,8 @@ interface SocialMediaUrl {
 
 const Index = () => {
   const { toast } = useToast();
+  const { results, stats, isLoading, search } = useGoogleSearch();
+  
   const [keywords, setKeywords] = useState<string[]>([]);
   const [negativeKeywords, setNegativeKeywords] = useState<string[]>([
     "penipuan",
@@ -28,23 +32,20 @@ const Index = () => {
     googleAll: true,
     googleNews: true,
   });
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleGenerateReport = () => {
-    setIsLoading(true);
-    toast({
-      title: "Memproses Report",
-      description: "Mohon tunggu, kami sedang menganalisis data...",
+  const handleGenerateReport = async () => {
+    // First, run the search
+    await search({
+      keywords,
+      negativeKeywords,
+      sources,
+      limit: 10,
     });
-    
-    // Simulate processing
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Fitur dalam pengembangan",
-        description: "Integrasi AI dan PDF generator akan segera tersedia!",
-      });
-    }, 2000);
+
+    toast({
+      title: "Pencarian Selesai",
+      description: "Report PDF generator akan tersedia setelah semua data dianalisis",
+    });
   };
 
   return (
@@ -113,25 +114,37 @@ const Index = () => {
                 <h2 className="text-lg font-semibold text-foreground">URL Social Media (Opsional)</h2>
               </div>
               <SocialMediaInput urls={socialUrls} onUrlsChange={setSocialUrls} />
-            </div>
           </div>
+        </div>
 
-          {/* Right Column - Preview */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <FileSliders className="h-5 w-5 text-accent" />
-                <h2 className="text-lg font-semibold text-foreground">Preview & Generate</h2>
-              </div>
-              <AnalysisPreview
-                keywords={keywords}
-                negativeKeywords={negativeKeywords}
-                urlCount={socialUrls.length}
-                onGenerateReport={handleGenerateReport}
-                isLoading={isLoading}
-              />
+        {/* Right Column - Preview */}
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <FileSliders className="h-5 w-5 text-accent" />
+              <h2 className="text-lg font-semibold text-foreground">Preview & Generate</h2>
             </div>
+            <AnalysisPreview
+              keywords={keywords}
+              negativeKeywords={negativeKeywords}
+              urlCount={socialUrls.length}
+              onGenerateReport={handleGenerateReport}
+              isLoading={isLoading}
+              searchStats={stats}
+            />
           </div>
+        </div>
+
+        {/* Search Results - Full Width */}
+        {(results.length > 0 || isLoading) && (
+          <div className="lg:col-span-3">
+            <SearchResults 
+              results={results} 
+              stats={stats} 
+              isLoading={isLoading} 
+            />
+          </div>
+        )}
         </div>
       </main>
 
