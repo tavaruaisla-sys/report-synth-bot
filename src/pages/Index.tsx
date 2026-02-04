@@ -177,6 +177,8 @@ const Index = () => {
         isGeneratingAiSummary={reportGenerator.isGeneratingAiSummary}
         onGenerateReport={reportGenerator.generateReport}
         isGenerating={reportGenerator.isGenerating}
+        previewData={reportGenerator.previewData}
+        onUpdateScreenshotPreview={reportGenerator.updateScreenshotPreview}
       />
 
       {/* Footer */}
