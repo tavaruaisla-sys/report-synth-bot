@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Upload, Sparkles, FileText, Link, BarChart2, Image, Eye } from "lucide-react";
+import { Plus, Trash2, Upload, Sparkles, FileText, Link, BarChart2, Image, Eye, Newspaper, Share2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,25 +128,40 @@ const ReportDataForm = ({
             Generate PDF Report
           </DialogTitle>
           <DialogDescription>
-            Lengkapi data berikut untuk generate report PDF
+            Lengkapi data berikut berdasarkan struktur slide report
           </DialogDescription>
         </DialogHeader>
         
         <ScrollArea className="max-h-[60vh]">
           <Tabs defaultValue="basic" className="p-6 pt-4">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="basic">Basic Info</TabsTrigger>
-              <TabsTrigger value="screenshots">Screenshots</TabsTrigger>
-              <TabsTrigger value="social">Social Media</TabsTrigger>
-              <TabsTrigger value="content">Content Links</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="basic" className="text-xs">
+                <span className="hidden sm:inline">Slide 1-2:</span> Cover
+              </TabsTrigger>
+              <TabsTrigger value="screenshots" className="text-xs">
+                <span className="hidden sm:inline">Slide 4-5:</span> SERP
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="text-xs">
+                <span className="hidden sm:inline">Slide 6-7:</span> AI
+              </TabsTrigger>
+              <TabsTrigger value="data" className="text-xs">
+                <span className="hidden sm:inline">Slide 9:</span> Data
+              </TabsTrigger>
+              <TabsTrigger value="production" className="text-xs">
+                <span className="hidden sm:inline">Slide 10+:</span> Links
+              </TabsTrigger>
               <TabsTrigger value="preview" className="flex items-center gap-1">
                 <Eye className="h-3 w-3" />
-                Preview
               </TabsTrigger>
             </TabsList>
             
-            {/* Basic Info Tab */}
+            {/* Slide 1-2: Cover & Executive Summary */}
             <TabsContent value="basic" className="space-y-4 mt-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <FileText className="h-4 w-4" />
+                <span>Slide 1: Cover | Slide 2: Executive Summary</span>
+              </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="reportTitle">Report Title</Label>
@@ -169,15 +184,18 @@ const ReportDataForm = ({
                 </div>
               </div>
               
-              {/* Executive Summary */}
+              {/* Slide 2: Executive Summary */}
               <Card>
                 <CardHeader className="py-3">
-                  <CardTitle className="text-sm font-medium">Executive Summary</CardTitle>
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Newspaper className="h-4 w-4" />
+                    Slide 2: Executive Summary
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>News Status</Label>
+                      <Label>NEWS / PEMBERITAAN - Status</Label>
                       <Select 
                         value={formData.newsStatus} 
                         onValueChange={(v) => onUpdateFormData({ newsStatus: v as 'recovery' | 'monitoring' | 'crisis' })}
@@ -193,7 +211,7 @@ const ReportDataForm = ({
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Social Media Status</Label>
+                      <Label>SOSIAL MEDIA - Status</Label>
                       <Select 
                         value={formData.socialMediaStatus} 
                         onValueChange={(v) => onUpdateFormData({ socialMediaStatus: v as 'positive' | 'neutral' | 'negative' })}
@@ -210,66 +228,49 @@ const ReportDataForm = ({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>News Description</Label>
+                    <Label>NEWS / PEMBERITAAN - Deskripsi</Label>
                     <Textarea
                       value={formData.newsDescription}
                       onChange={(e) => onUpdateFormData({ newsDescription: e.target.value })}
-                      placeholder="Deskripsi kondisi pemberitaan..."
-                      rows={2}
+                      placeholder="Contoh: Terdapat pemberitaan negatif baru terkait isu... Pemberitaan masih bersifat tematik dan terbatas..."
+                      rows={3}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Social Media Description</Label>
+                    <Label>SOSIAL MEDIA - Deskripsi (Aktivitas Akun Lawan & Counter)</Label>
                     <Textarea
                       value={formData.socialMediaDescription}
                       onChange={(e) => onUpdateFormData({ socialMediaDescription: e.target.value })}
-                      placeholder="Deskripsi kondisi social media..."
-                      rows={2}
+                      placeholder="Contoh: Aktivitas Akun Lawan: 145 posting dengan total 3.124.896 views. Aktivitas Counter: Total views 2.077.049, engagement 96.523..."
+                      rows={3}
                     />
                   </div>
-                </CardContent>
-              </Card>
-              
-              {/* AI Summary */}
-              <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-accent" />
-                    AI Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    onClick={onGenerateAiSummary} 
-                    disabled={isGeneratingAiSummary}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    {isGeneratingAiSummary ? "Generating..." : "Generate AI Summary"}
-                  </Button>
-                  {aiSummary && (
-                    <div className="rounded-lg bg-muted p-3 text-sm whitespace-pre-wrap">
-                      {aiSummary}
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </TabsContent>
             
-            {/* Screenshots Tab */}
+            {/* Slide 4-5: Screenshots SERP */}
             <TabsContent value="screenshots" className="space-y-4 mt-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <Image className="h-4 w-4" />
+                <span>Slide 4: SERP Before | Slide 5: SERP After</span>
+              </div>
+              
               <Card>
                 <CardHeader className="py-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Image className="h-4 w-4" />
-                    SERP Screenshots (Before/After)
+                    Google Search Results Screenshots
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
+                    {/* Slide 4: Before */}
                     <div className="space-y-2">
-                      <Label>Before Screenshot</Label>
+                      <Label className="flex items-center gap-2">
+                        <span className="bg-destructive/20 text-destructive text-xs px-2 py-0.5 rounded">Slide 4</span>
+                        Before - Hasil Negatif
+                      </Label>
                       <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
                         <input
                           type="file"
@@ -290,11 +291,16 @@ const ReportDataForm = ({
                       <Input
                         value={formData.serpCaptionBefore}
                         onChange={(e) => onUpdateFormData({ serpCaptionBefore: e.target.value })}
-                        placeholder="Caption before..."
+                        placeholder="Contoh: Before - 3 Feb 2026 (Keyword: dirut pupuk indonesia)"
                       />
                     </div>
+                    
+                    {/* Slide 5: After */}
                     <div className="space-y-2">
-                      <Label>After Screenshot</Label>
+                      <Label className="flex items-center gap-2">
+                        <span className="bg-primary/20 text-primary text-xs px-2 py-0.5 rounded">Slide 5</span>
+                        After - Hasil Bersih
+                      </Label>
                       <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
                         <input
                           type="file"
@@ -315,7 +321,7 @@ const ReportDataForm = ({
                       <Input
                         value={formData.serpCaptionAfter}
                         onChange={(e) => onUpdateFormData({ serpCaptionAfter: e.target.value })}
-                        placeholder="Caption after..."
+                        placeholder="Contoh: After - 3 Feb 2026 (Hasil positif mendominasi)"
                       />
                     </div>
                   </div>
@@ -323,17 +329,60 @@ const ReportDataForm = ({
               </Card>
             </TabsContent>
             
-            {/* Social Media Stats Tab */}
-            <TabsContent value="social" className="space-y-4 mt-4">
+            {/* Slide 6-7: AI Analysis */}
+            <TabsContent value="ai" className="space-y-4 mt-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <Sparkles className="h-4 w-4" />
+                <span>Slide 6-7: AI Analysis Summary (Perplexity Style)</span>
+              </div>
+              
+              <Card>
+                <CardHeader className="py-3">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-accent" />
+                    Generate AI Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    AI akan menganalisis keyword brand dan hasil pencarian untuk membuat ringkasan reputasi.
+                  </p>
+                  <Button 
+                    onClick={onGenerateAiSummary} 
+                    disabled={isGeneratingAiSummary}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {isGeneratingAiSummary ? "Generating..." : "Generate AI Summary"}
+                  </Button>
+                  {aiSummary && (
+                    <div className="rounded-lg bg-muted p-3 text-sm whitespace-pre-wrap max-h-64 overflow-y-auto">
+                      {aiSummary}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            {/* Slide 9: Data Summary */}
+            <TabsContent value="data" className="space-y-4 mt-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <BarChart2 className="h-4 w-4" />
+                <span>Slide 9: Data Summary & Social Media Statistics</span>
+              </div>
+              
               <Card>
                 <CardHeader className="py-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <BarChart2 className="h-4 w-4" />
-                    Social Media Statistics
+                    Konten yang Diproduksi (Views, Engagement)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Add new stat */}
+                  <p className="text-xs text-muted-foreground">
+                    Masukkan statistik konten counter yang sudah diproduksi (TikTok, Instagram, YouTube, dll)
+                  </p>
                   <div className="grid grid-cols-6 gap-2">
                     <Input
                       placeholder="Platform"
@@ -353,13 +402,13 @@ const ReportDataForm = ({
                     />
                     <Input
                       type="number"
-                      placeholder="Likes"
+                      placeholder="Like"
                       value={newSocialStat.likes || ''}
                       onChange={(e) => setNewSocialStat(prev => ({ ...prev, likes: parseInt(e.target.value) || 0 }))}
                     />
                     <Input
                       type="number"
-                      placeholder="Comments"
+                      placeholder="Comment"
                       value={newSocialStat.comments || ''}
                       onChange={(e) => setNewSocialStat(prev => ({ ...prev, comments: parseInt(e.target.value) || 0 }))}
                     />
@@ -371,9 +420,9 @@ const ReportDataForm = ({
                   {/* List of stats */}
                   {formData.socialMediaStats.map((stat, index) => (
                     <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-                      <span className="font-medium">{stat.platform}</span>
-                      <span className="text-sm text-muted-foreground">
-                        Views: {stat.views.toLocaleString()} | Likes: {stat.likes.toLocaleString()}
+                      <span className="font-medium text-sm">{stat.platform}</span>
+                      <span className="text-xs text-muted-foreground">
+                        Views: {stat.views.toLocaleString()} | Like: {stat.likes.toLocaleString()} | Comment: {stat.comments.toLocaleString()}
                       </span>
                       <Button 
                         variant="ghost" 
@@ -385,18 +434,27 @@ const ReportDataForm = ({
                       </Button>
                     </div>
                   ))}
+                  
+                  {formData.socialMediaStats.length > 0 && (
+                    <div className="pt-2 border-t">
+                      <p className="text-xs font-medium text-muted-foreground">Total:</p>
+                      <div className="grid grid-cols-4 gap-2 mt-1 text-sm">
+                        <div>Views: <span className="font-bold">{formData.socialMediaStats.reduce((a, b) => a + b.views, 0).toLocaleString()}</span></div>
+                        <div>Like: <span className="font-bold">{formData.socialMediaStats.reduce((a, b) => a + b.likes, 0).toLocaleString()}</span></div>
+                        <div>Comment: <span className="font-bold">{formData.socialMediaStats.reduce((a, b) => a + b.comments, 0).toLocaleString()}</span></div>
+                        <div>Share: <span className="font-bold">{formData.socialMediaStats.reduce((a, b) => a + b.shares, 0).toLocaleString()}</span></div>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-            </TabsContent>
             
-            {/* Content Links Tab */}
-            <TabsContent value="content" className="space-y-4 mt-4">
               {/* Counter Content */}
               <Card>
                 <CardHeader className="py-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Link className="h-4 w-4" />
-                    Counter Content Links
+                    Counter Content (Artikel/Konten Positif)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -445,13 +503,27 @@ const ReportDataForm = ({
                   ))}
                 </CardContent>
               </Card>
-              
+            </TabsContent>
+            
+            {/* Slide 10+: Production Links */}
+            <TabsContent value="production" className="space-y-4 mt-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <Share2 className="h-4 w-4" />
+                <span>Slide 10+: Production Results (News & Social Media Links)</span>
+              </div>
+
               {/* Production Links */}
               <Card>
                 <CardHeader className="py-3">
-                  <CardTitle className="text-sm font-medium">Production Links (Appendix)</CardTitle>
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Newspaper className="h-4 w-4" />
+                    Produksi & Distribusi Konten
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <p className="text-xs text-muted-foreground">
+                    Link artikel news dan postingan social media yang sudah dipublikasikan
+                  </p>
                   <div className="grid grid-cols-4 gap-2">
                     <Input
                       placeholder="Title"
