@@ -73,9 +73,10 @@ const Index = () => {
               <span>AI-Powered Report Generator</span>
             </div>
             <h1 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-              Deteksi Keyword Negatif &<br />
-              <span className="text-accent">Generate Report PDF</span>
-            </h1>
+  Monitoring Reputasi Brand &<br />
+  <span className="text-accent">Analisis Keyword Negatif Otomatis</span>
+</h1>
+
             <p className="mx-auto max-w-2xl text-base text-muted-foreground md:text-lg">
               Tool AI untuk memonitor reputasi brand Anda di hasil pencarian Google. 
               Deteksi otomatis keyword negatif dan buat report dalam format slide PDF profesional.
