@@ -2,3 +2,6 @@ project_id = "psyiqnjxahablwaictaq"
 
 [functions.ai-summary]
 verify_jwt = false
+
+[functions.generate-news-description]
+verify_jwt = false

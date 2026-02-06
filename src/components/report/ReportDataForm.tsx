@@ -26,6 +26,8 @@ interface ReportDataFormProps {
   aiSummary: string;
   onGenerateAiSummary: () => void;
   isGeneratingAiSummary: boolean;
+  onGenerateNewsDescription: () => void;
+  isGeneratingNewsDesc: boolean;
   onGenerateReport: () => void;
   isGenerating: boolean;
   previewData: ReportData;
@@ -46,6 +48,8 @@ const ReportDataForm = ({
   aiSummary,
   onGenerateAiSummary,
   isGeneratingAiSummary,
+  onGenerateNewsDescription,
+  isGeneratingNewsDesc,
   onGenerateReport,
   isGenerating,
   previewData,
@@ -228,12 +232,24 @@ const ReportDataForm = ({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>NEWS / PEMBERITAAN - Deskripsi</Label>
+                    <div className="flex items-center justify-between">
+                      <Label>NEWS / PEMBERITAAN - Deskripsi</Label>
+                      <Button
+                        onClick={onGenerateNewsDescription}
+                        disabled={isGeneratingNewsDesc}
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs"
+                      >
+                        <Sparkles className="mr-1 h-3 w-3" />
+                        {isGeneratingNewsDesc ? "Generating..." : "Generate AI"}
+                      </Button>
+                    </div>
                     <Textarea
                       value={formData.newsDescription}
                       onChange={(e) => onUpdateFormData({ newsDescription: e.target.value })}
                       placeholder="Contoh: Terdapat pemberitaan negatif baru terkait isu... Pemberitaan masih bersifat tematik dan terbatas..."
-                      rows={3}
+                      rows={4}
                     />
                   </div>
                   <div className="space-y-2">
