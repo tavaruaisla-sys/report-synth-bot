@@ -21,6 +21,7 @@ export function useReportGenerator({
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingAiSummary, setIsGeneratingAiSummary] = useState(false);
+  const [isGeneratingNewsDesc, setIsGeneratingNewsDesc] = useState(false);
   const [formData, setFormData] = useState<ReportFormData>({
     ...defaultReportFormData,
     brandName: keywords[0] || '',
@@ -131,6 +132,54 @@ export function useReportGenerator({
     }));
   };
 
+  const generateNewsDescription = async () => {
+    if (searchResults.length === 0) {
+      toast({
+        title: "Error",
+        description: "Tidak ada hasil pencarian untuk dianalisis",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingNewsDesc(true);
+
+    try {
+      const resultsContext = searchResults.slice(0, 10).map(r => 
+        `- ${r.title}: ${r.description} (${r.sentiment})`
+      ).join('\n');
+
+      const { data, error } = await supabase.functions.invoke('generate-news-description', {
+        body: {
+          keywords,
+          negativeKeywords,
+          searchResults: resultsContext,
+          stats: searchStats,
+          brandName: formData.brandName,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.description) {
+        setFormData(prev => ({ ...prev, newsDescription: data.description }));
+        toast({
+          title: "Deskripsi Generated",
+          description: "Deskripsi pemberitaan berhasil di-generate oleh AI",
+        });
+      }
+    } catch (error) {
+      console.error('Generate news description error:', error);
+      toast({
+        title: "Error",
+        description: "Gagal generate deskripsi. Silakan coba lagi.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingNewsDesc(false);
+    }
+  };
+
   const generateAiSummary = async () => {
     if (searchResults.length === 0) {
       toast({
@@ -144,7 +193,6 @@ export function useReportGenerator({
     setIsGeneratingAiSummary(true);
 
     try {
-      // Prepare context from search results
       const resultsContext = searchResults.slice(0, 10).map(r => 
         `- ${r.title}: ${r.description} (${r.sentiment})`
       ).join('\n');
@@ -284,6 +332,8 @@ export function useReportGenerator({
     aiSummary,
     generateAiSummary,
     isGeneratingAiSummary,
+    generateNewsDescription,
+    isGeneratingNewsDesc,
     generateReport,
     isGenerating,
     previewData,
