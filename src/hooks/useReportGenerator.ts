@@ -132,11 +132,11 @@ export function useReportGenerator({
     }));
   };
 
-  const generateNewsDescription = async () => {
-    if (searchResults.length === 0) {
+  const generateNewsDescription = async (googleScreenshots?: string[]) => {
+    if (searchResults.length === 0 && (!googleScreenshots || googleScreenshots.length === 0)) {
       toast({
         title: "Error",
-        description: "Tidak ada hasil pencarian untuk dianalisis",
+        description: "Tidak ada hasil pencarian atau screenshot untuk dianalisis",
         variant: "destructive",
       });
       return;
@@ -156,6 +156,7 @@ export function useReportGenerator({
           searchResults: resultsContext,
           stats: searchStats,
           brandName: formData.brandName,
+          googleScreenshots: googleScreenshots || [],
         },
       });
 
@@ -165,7 +166,9 @@ export function useReportGenerator({
         setFormData(prev => ({ ...prev, newsDescription: data.description }));
         toast({
           title: "Deskripsi Generated",
-          description: "Deskripsi pemberitaan berhasil di-generate oleh AI",
+          description: googleScreenshots?.length 
+            ? `Deskripsi di-generate dengan ${googleScreenshots.length} screenshot Google`
+            : "Deskripsi pemberitaan berhasil di-generate oleh AI",
         });
       }
     } catch (error) {

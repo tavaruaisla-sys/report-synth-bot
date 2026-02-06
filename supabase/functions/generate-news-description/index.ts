@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { keywords, negativeKeywords, searchResults, stats, brandName } = await req.json();
+    const { keywords, negativeKeywords, searchResults, stats, brandName, googleScreenshots } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -32,13 +32,17 @@ Pemberitaan positif dan netral tetap mendominasi ruang pencarian dan pemberitaan
 
 INSTRUKSI PENTING:
 - Analisis hasil pencarian yang diberikan untuk mengidentifikasi isu-isu negatif, positif, dan netral
-- Sesuaikan template di atas berdasarkan data aktual dari hasil pencarian
+- Jika ada screenshot halaman Google yang dilampirkan, PRIORITASKAN analisis visual dari screenshot tersebut karena lebih akurat daripada data teks
+- Dari screenshot Google, identifikasi: judul berita, sumber media, topik utama, dan sentimen dari setiap hasil pencarian yang terlihat
+- Sesuaikan template di atas berdasarkan data aktual dari hasil pencarian dan screenshot
 - Jika tidak ada pemberitaan negatif, sesuaikan narasi menjadi positif
 - Tulis dalam 2-3 paragraf, ringkas dan profesional
 - JANGAN gunakan format markdown (bold, italic, bullet points). Tulis sebagai paragraf narasi biasa
 - Langsung tulis deskripsinya tanpa judul atau pembuka`;
 
-    const userPrompt = `Buatkan deskripsi kondisi pemberitaan (NEWS) untuk brand "${brandName || 'Brand'}":
+    const hasScreenshots = googleScreenshots && googleScreenshots.length > 0;
+
+    let userPromptText = `Buatkan deskripsi kondisi pemberitaan (NEWS) untuk brand "${brandName || 'Brand'}":
 
 **Keywords Brand**: ${keywords.join(', ')}
 **Keywords Negatif yang Dipantau**: ${negativeKeywords.join(', ')}
@@ -50,11 +54,46 @@ INSTRUKSI PENTING:
 - Sentiment score: ${stats?.sentimentScore || 100}%
 
 **Hasil Pencarian**:
-${searchResults}
+${searchResults || 'Tidak ada data teks hasil pencarian'}`;
 
-Tulis deskripsi pemberitaan sesuai template yang diberikan.`;
+    if (hasScreenshots) {
+      userPromptText += `\n\n**PENTING**: ${googleScreenshots.length} screenshot halaman pencarian Google dilampirkan. Analisis secara visual setiap screenshot untuk mengidentifikasi judul berita, sumber, dan sentimen yang terlihat. Prioritaskan informasi dari screenshot karena lebih akurat.`;
+    }
 
-    console.log("Generating news description...");
+    userPromptText += `\n\nTulis deskripsi pemberitaan sesuai template yang diberikan.`;
+
+    // Build message content - support multimodal if screenshots provided
+    let userContent: any;
+    
+    if (hasScreenshots) {
+      // Multimodal: text + images
+      userContent = [
+        { type: "text", text: userPromptText },
+        ...googleScreenshots.map((base64Img: string) => {
+          // Extract mime type and data from base64 data URL
+          const matches = base64Img.match(/^data:(image\/[^;]+);base64,(.+)$/);
+          if (matches) {
+            return {
+              type: "image_url",
+              image_url: {
+                url: base64Img,
+              },
+            };
+          }
+          // Fallback: assume it's already a proper URL or raw base64
+          return {
+            type: "image_url",
+            image_url: {
+              url: base64Img.startsWith('data:') ? base64Img : `data:image/png;base64,${base64Img}`,
+            },
+          };
+        }),
+      ];
+    } else {
+      userContent = userPromptText;
+    }
+
+    console.log(`Generating news description... (with ${hasScreenshots ? googleScreenshots.length : 0} screenshots)`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -66,7 +105,7 @@ Tulis deskripsi pemberitaan sesuai template yang diberikan.`;
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          { role: "user", content: userContent },
         ],
         max_tokens: 800,
         temperature: 0.6,
