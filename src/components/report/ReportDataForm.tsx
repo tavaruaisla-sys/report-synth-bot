@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Trash2, Upload, Sparkles, FileText, Link, BarChart2, Image, Eye, Newspaper, Share2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { Plus, Trash2, Upload, Sparkles, FileText, Link, BarChart2, Image, Eye, Newspaper, Share2, ImagePlus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,7 @@ interface ReportDataFormProps {
   aiSummary: string;
   onGenerateAiSummary: () => void;
   isGeneratingAiSummary: boolean;
-  onGenerateNewsDescription: () => void;
+  onGenerateNewsDescription: (googleScreenshots?: string[]) => void;
   isGeneratingNewsDesc: boolean;
   onGenerateReport: () => void;
   isGenerating: boolean;
@@ -77,6 +77,31 @@ const ReportDataForm = ({
   });
   
   const [productionType, setProductionType] = useState<'news' | 'social'>('news');
+
+  // Google screenshot uploads for AI analysis
+  const [googleScreenshots, setGoogleScreenshots] = useState<{ file: File; preview: string }[]>([]);
+  const googleScreenshotInputRef = useRef<HTMLInputElement>(null);
+
+  const handleGoogleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setGoogleScreenshots(prev => [...prev, { file, preview: reader.result as string }]);
+      };
+      reader.readAsDataURL(file);
+    });
+    if (e.target) e.target.value = '';
+  };
+
+  const removeGoogleScreenshot = (index: number) => {
+    setGoogleScreenshots(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleGenerateWithScreenshots = () => {
+    const base64Images = googleScreenshots.map(s => s.preview);
+    onGenerateNewsDescription(base64Images.length > 0 ? base64Images : undefined);
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'serpScreenshotBefore' | 'serpScreenshotAfter') => {
     const file = e.target.files?.[0];
@@ -231,11 +256,11 @@ const ReportDataForm = ({
                       </Select>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label>NEWS / PEMBERITAAN - Deskripsi</Label>
                       <Button
-                        onClick={onGenerateNewsDescription}
+                        onClick={handleGenerateWithScreenshots}
                         disabled={isGeneratingNewsDesc}
                         variant="outline"
                         size="sm"
@@ -245,6 +270,61 @@ const ReportDataForm = ({
                         {isGeneratingNewsDesc ? "Generating..." : "Generate AI"}
                       </Button>
                     </div>
+                    
+                    {/* Google Screenshot Upload for AI Context */}
+                    <div className="rounded-lg border border-dashed border-accent/40 bg-accent/5 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs flex items-center gap-1.5 text-muted-foreground">
+                          <ImagePlus className="h-3.5 w-3.5" />
+                          Upload Screenshot Google (Opsional - untuk hasil AI lebih akurat)
+                        </Label>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 text-xs"
+                          onClick={() => googleScreenshotInputRef.current?.click()}
+                        >
+                          <Plus className="mr-1 h-3 w-3" />
+                          Tambah
+                        </Button>
+                        <input
+                          ref={googleScreenshotInputRef}
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleGoogleScreenshotUpload}
+                          className="hidden"
+                        />
+                      </div>
+                      
+                      {googleScreenshots.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-2">
+                          {googleScreenshots.map((ss, index) => (
+                            <div key={index} className="relative group rounded-md overflow-hidden border border-border">
+                              <img
+                                src={ss.preview}
+                                alt={`Google screenshot ${index + 1}`}
+                                className="w-full h-20 object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeGoogleScreenshot(index)}
+                                className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                              <p className="text-[10px] text-muted-foreground p-1 truncate">{ss.file.name}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-muted-foreground">
+                          Upload screenshot halaman pencarian Google agar AI bisa menganalisis konten visual untuk deskripsi yang lebih akurat.
+                        </p>
+                      )}
+                    </div>
+                    
                     <Textarea
                       value={formData.newsDescription}
                       onChange={(e) => onUpdateFormData({ newsDescription: e.target.value })}
