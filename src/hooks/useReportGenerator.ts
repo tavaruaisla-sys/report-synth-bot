@@ -80,12 +80,12 @@ export function useReportGenerator({
       after2: formData.serpCaptionAfter2,
     },
     aiSummary: aiSummary || undefined,
-    socialMediaStats: formData.socialMediaStats,
-    keywordStats: formData.keywordStats,
-    productionStats: formData.productionStats,
-    counterContent: formData.counterContent,
-    newsProduction: formData.newsProduction,
-    socialMediaProduction: formData.socialMediaProduction,
+    socialMediaStats: formData.socialMediaStats || [],
+    keywordStats: formData.keywordStats || [],
+    productionStats: formData.productionStats || { views: '0', likes: '0', comments: '0', saved: '0', shares: '0' },
+    counterContent: formData.counterContent || [],
+    newsProduction: formData.newsProduction || [],
+    socialMediaProduction: formData.socialMediaProduction || [],
   }), [formData, keywords, negativeKeywords, searchResults, searchStats, aiSummary, screenshotPreviews]);
 
   const saveReport = async () => {

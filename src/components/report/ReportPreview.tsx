@@ -283,8 +283,12 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
                 data.keywordStats.map((stat, i) => (
                   <div key={i} className={`grid grid-cols-5 text-[10px] p-2 gap-1 border-b last:border-0 items-center ${i % 2 === 0 ? 'bg-muted/20' : 'bg-white'}`}>
                     <span className="col-span-1 font-medium truncate">{stat.keyword}</span>
-                    <span className="text-center text-red-600">{stat.searchBefore}</span>
-                    <span className="text-center text-red-600">{stat.newsBefore}</span>
+                    <span className={`text-center ${stat.searchBefore === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {stat.searchBefore}
+                    </span>
+                    <span className={`text-center ${stat.newsBefore === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {stat.newsBefore}
+                    </span>
                     <span className={`text-center ${stat.searchCurrent === 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {stat.searchCurrent}
                     </span>
@@ -331,7 +335,7 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
       </SlideWrapper>
 
       {/* Optional: Social Media Stats */}
-      {data.socialMediaStats.length > 0 && (
+      {data.socialMediaStats?.length > 0 && (
         <SlideWrapper>
           <SlideHeader title="SOCIAL MEDIA STATISTICS" pageNum={9} />
           <div className="p-4 grid grid-cols-2 gap-2">
@@ -353,7 +357,7 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
       )}
 
       {/* Optional: Counter Content */}
-      {data.counterContent.length > 0 && (
+      {data.counterContent?.length > 0 && (
         <SlideWrapper>
           <SlideHeader title="COUNTER NARRATIVE CONTENT" pageNum={11} />
           <div className="p-4 space-y-2">
@@ -376,7 +380,7 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
       )}
 
       {/* Production Links - News */}
-      {data.newsProduction.length > 0 && (
+      {data.newsProduction?.length > 0 && (
         <SlideWrapper>
           <SlideHeader title="NEWS PRODUCTION LINKS" pageNum={12} />
           <div className="p-8 flex flex-col h-full overflow-hidden">
@@ -402,7 +406,7 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
       )}
 
       {/* Production Links - Social Media */}
-      {data.socialMediaProduction.length > 0 && (
+      {data.socialMediaProduction?.length > 0 && (
         <SlideWrapper>
           <SlideHeader title="SOCIAL MEDIA PRODUCTION LINKS" pageNum={13} />
           <div className="p-8 flex flex-col h-full overflow-hidden">
