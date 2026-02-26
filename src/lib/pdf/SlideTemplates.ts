@@ -36,32 +36,21 @@ const drawFooter = (doc: jsPDF, brandName: string): void => {
 
 // SLIDE 1: Cover
 export const createCoverSlide = (doc: jsPDF, data: ReportData): void => {
-  // Background gradient effect
-  doc.setFillColor(REPORT_COLORS.primary);
+  // Background: Very dark navy
+  doc.setFillColor('#0f172a');
   doc.rect(0, 0, SLIDE_CONFIG.width, SLIDE_CONFIG.height, 'F');
   
-  // Decorative accent bar
-  doc.setFillColor(REPORT_COLORS.accent);
-  doc.rect(0, SLIDE_CONFIG.height * 0.4, SLIDE_CONFIG.width, 8, 'F');
-  
-  // Brand name
+  // Report title: Cyan color
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.setTextColor('#ffffff');
-  doc.text(data.brandName.toUpperCase(), SLIDE_CONFIG.width / 2, 60, { align: 'center' });
-  
-  // Report title
   doc.setFontSize(48);
-  doc.text(data.reportTitle, SLIDE_CONFIG.width / 2, SLIDE_CONFIG.height / 2, { align: 'center' });
+  doc.setTextColor('#22d3ee'); // cyan-400
+  doc.text(data.reportTitle, SLIDE_CONFIG.width / 2, SLIDE_CONFIG.height / 2 - 10, { align: 'center' });
   
-  // Subtitle
+  // Update Date: White color
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(14);
-  doc.text('Brand Monitoring & Reputation Report', SLIDE_CONFIG.width / 2, SLIDE_CONFIG.height / 2 + 20, { align: 'center' });
-  
-  // Date
-  doc.setFontSize(12);
-  doc.text(`Update: ${data.updateDate}`, SLIDE_CONFIG.width / 2, SLIDE_CONFIG.height - 40, { align: 'center' });
+  doc.setFontSize(24);
+  doc.setTextColor('#ffffff');
+  doc.text(`Update ${data.updateDate}`, SLIDE_CONFIG.width / 2, SLIDE_CONFIG.height / 2 + 20, { align: 'center' });
 };
 
 // SLIDE 2: Executive Summary (REPUTATION RECOVERY - CURRENT STATUS)
