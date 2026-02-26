@@ -6,6 +6,7 @@ import Header from "@/components/layout/Header";
 import ReportDataForm from "@/components/report/ReportDataForm";
 import { useReportGenerator } from "@/hooks/useReportGenerator";
 import { useGoogleSearch } from "@/hooks/useGoogleSearch";
+import { ReportHistory } from "@/components/report/ReportHistory";
 
 interface GoogleScreenshot {
   file: File;
@@ -44,6 +45,9 @@ const ReportPage = () => {
           </Button>
           <div className="h-5 w-px bg-border" />
           <h1 className="text-lg font-semibold text-foreground">Generate PDF Report</h1>
+          <div className="ml-auto">
+            <ReportHistory onLoadReport={reportGenerator.loadReport} />
+          </div>
         </div>
       </div>
 
@@ -68,6 +72,8 @@ const ReportPage = () => {
           previewData={reportGenerator.previewData}
           onUpdateScreenshotPreview={reportGenerator.updateScreenshotPreview}
           googleScreenshots={googleScreenshots}
+          onSave={reportGenerator.saveReport}
+          isSaving={reportGenerator.isSaving}
         />
       </div>
     </div>

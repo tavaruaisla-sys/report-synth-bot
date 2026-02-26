@@ -4,6 +4,7 @@ import { ReportPDFGenerator, fileToBase64 } from '@/lib/pdf/ReportPDFGenerator';
 import { SearchResult, SearchStats } from '@/lib/api/google-search';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { reportService, DBReport } from '@/services/reportService';
 
 interface UseReportGeneratorProps {
   keywords: string[];
@@ -20,6 +21,8 @@ export function useReportGenerator({
 }: UseReportGeneratorProps) {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [currentReportId, setCurrentReportId] = useState<string | null>(null);
   const [isGeneratingAiSummary, setIsGeneratingAiSummary] = useState(false);
   const [isGeneratingNewsDesc, setIsGeneratingNewsDesc] = useState(false);
   const [formData, setFormData] = useState<ReportFormData>({
@@ -76,6 +79,120 @@ export function useReportGenerator({
     newsProduction: formData.newsProduction,
     socialMediaProduction: formData.socialMediaProduction,
   }), [formData, keywords, negativeKeywords, searchResults, searchStats, aiSummary, screenshotPreviews]);
+
+  const saveReport = async () => {
+    if (!formData.brandName) {
+      toast({
+        title: "Error",
+        description: "Nama brand harus diisi",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Handle image uploads if they are Files
+      let screenshotBeforeUrl = previewData.serpScreenshotBefore;
+      if (formData.serpScreenshotBefore instanceof File) {
+        const url = await reportService.uploadImage(formData.serpScreenshotBefore);
+        if (url) screenshotBeforeUrl = url;
+      }
+
+      let screenshotAfterUrl = previewData.serpScreenshotAfter;
+      if (formData.serpScreenshotAfter instanceof File) {
+        const url = await reportService.uploadImage(formData.serpScreenshotAfter);
+        if (url) screenshotAfterUrl = url;
+      }
+
+      // Prepare data to save
+      const reportDataToSave: ReportData = {
+        ...previewData,
+        serpScreenshotBefore: screenshotBeforeUrl,
+        serpScreenshotAfter: screenshotAfterUrl,
+      };
+
+      let savedReport: DBReport | null = null;
+      
+      if (currentReportId) {
+        savedReport = await reportService.updateReport(currentReportId, reportDataToSave);
+      } else {
+        savedReport = await reportService.createReport(reportDataToSave);
+      }
+
+      if (savedReport) {
+        setCurrentReportId(savedReport.id);
+        
+        // Update local state with URLs if images were uploaded
+        if (screenshotBeforeUrl !== previewData.serpScreenshotBefore || screenshotAfterUrl !== previewData.serpScreenshotAfter) {
+            setFormData(prev => ({
+                ...prev,
+                serpScreenshotBefore: screenshotBeforeUrl || prev.serpScreenshotBefore,
+                serpScreenshotAfter: screenshotAfterUrl || prev.serpScreenshotAfter
+            }));
+            setScreenshotPreviews({
+                before: screenshotBeforeUrl,
+                after: screenshotAfterUrl
+            });
+        }
+
+        toast({
+          title: "Success",
+          description: currentReportId ? "Report updated successfully" : "Report saved successfully",
+        });
+      } else {
+        throw new Error("Failed to save report");
+      }
+    } catch (error) {
+      console.error('Save report error:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan report. Silakan coba lagi.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const loadReport = (report: DBReport) => {
+    const data = report.data;
+    setCurrentReportId(report.id);
+    
+    // Populate form data
+    setFormData({
+      ...defaultReportFormData,
+      reportTitle: data.reportTitle,
+      brandName: data.brandName,
+      newsBulletPoints: data.newsBulletPoints || [],
+      socialMediaAccountStatusBefore: data.socialMediaAccountStatusBefore || '',
+      socialMediaAccountStatusAfter: data.socialMediaAccountStatusAfter || '',
+      socialMediaAccountStatusNote: data.socialMediaAccountStatusNote || '',
+      socialMediaCounterTotalViews: data.socialMediaCounterTotalViews || '',
+      socialMediaCounterTotalEngagement: data.socialMediaCounterTotalEngagement || '',
+      serpCaptionBefore: data.serpCaptions?.before || defaultReportFormData.serpCaptionBefore,
+      serpCaptionAfter: data.serpCaptions?.after || defaultReportFormData.serpCaptionAfter,
+      serpScreenshotBefore: data.serpScreenshotBefore,
+      serpScreenshotAfter: data.serpScreenshotAfter,
+      socialMediaStats: data.socialMediaStats || [],
+      counterContent: data.counterContent || [],
+      newsProduction: data.newsProduction || [],
+      socialMediaProduction: data.socialMediaProduction || [],
+      generateAiSummary: !!data.aiSummary,
+    });
+    
+    setAiSummary(data.aiSummary || '');
+    
+    setScreenshotPreviews({
+      before: data.serpScreenshotBefore,
+      after: data.serpScreenshotAfter,
+    });
+    
+    toast({
+      title: "Report Loaded",
+      description: `Report "${report.title}" berhasil dimuat`,
+    });
+  };
 
   // Handle screenshot preview updates
   const updateScreenshotPreview = async (file: File, type: 'before' | 'after') => {
@@ -348,5 +465,9 @@ export function useReportGenerator({
     isGenerating,
     previewData,
     updateScreenshotPreview,
+    saveReport,
+    isSaving,
+    loadReport,
+    currentReportId,
   };
 }
