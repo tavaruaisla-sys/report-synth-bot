@@ -168,7 +168,7 @@ const ReportDataForm = ({
         
         <div className="flex gap-0 border-t border-border" style={{ height: 'calc(90vh - 140px)' }}>
           {/* Left Column - Form */}
-          <div className="flex-1 min-w-0 border-r border-border">
+          <div className="w-1/2 min-w-0 border-r border-border">
             <ScrollArea className="h-full">
               <Tabs defaultValue="basic" className="p-6 pt-4">
                 <TabsList className="grid w-full grid-cols-5">
@@ -701,7 +701,7 @@ const ReportDataForm = ({
           </div>
 
           {/* Right Column - Realtime Preview */}
-          <div className="w-[420px] flex-shrink-0 flex flex-col">
+          <div className="w-1/2 flex-shrink-0 flex flex-col">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
               <Eye className="h-4 w-4 text-accent" />
               <h3 className="text-sm font-semibold text-foreground">Realtime Preview</h3>
