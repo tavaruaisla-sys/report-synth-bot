@@ -71,6 +71,7 @@ const ReportPage = () => {
           isGenerating={reportGenerator.isGenerating}
           previewData={reportGenerator.previewData}
           onUpdateScreenshotPreview={reportGenerator.updateScreenshotPreview}
+          onRemoveScreenshotPreview={reportGenerator.removeScreenshotPreview}
           googleScreenshots={googleScreenshots}
           onSave={reportGenerator.saveReport}
           isSaving={reportGenerator.isSaving}

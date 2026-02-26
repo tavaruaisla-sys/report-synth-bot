@@ -21,11 +21,15 @@ export interface ReportData {
   socialMediaCounterTotalEngagement: string;
   
   // SERP Screenshots (manual upload)
-  serpScreenshotBefore?: string; // base64 or URL
-  serpScreenshotAfter?: string; // base64 or URL
+  serpScreenshotBefore?: string[]; // base64 or URL array
+  serpScreenshotBefore2?: string[]; // base64 or URL array (Slide 4b)
+  serpScreenshotAfter?: string[]; // base64 or URL array
+  serpScreenshotAfter2?: string[]; // base64 or URL array (Slide 5b)
   serpCaptions?: {
     before: string;
+    before2?: string;
     after: string;
+    after2?: string;
   };
   
   // AI Summary
@@ -98,10 +102,14 @@ export interface ReportFormData {
   socialMediaCounterTotalEngagement: string;
   
   // Screenshots (file or URL)
-  serpScreenshotBefore?: File | string;
-  serpScreenshotAfter?: File | string;
+  serpScreenshotBefore?: (File | string)[];
+  serpScreenshotBefore2?: (File | string)[];
+  serpScreenshotAfter?: (File | string)[];
+  serpScreenshotAfter2?: (File | string)[];
   serpCaptionBefore: string;
+  serpCaptionBefore2?: string;
   serpCaptionAfter: string;
+  serpCaptionAfter2?: string;
   
   // Social Media Stats
   socialMediaStats: SocialMediaStat[];
@@ -127,8 +135,14 @@ export const defaultReportFormData: ReportFormData = {
   socialMediaAccountStatusNote: '',
   socialMediaCounterTotalViews: '',
   socialMediaCounterTotalEngagement: '',
+  serpScreenshotBefore: [],
+  serpScreenshotBefore2: [],
+  serpScreenshotAfter: [],
+  serpScreenshotAfter2: [],
   serpCaptionBefore: 'Before: Hasil pencarian sebelum optimasi',
+  serpCaptionBefore2: 'Before: Lanjutan hasil pencarian sebelum optimasi',
   serpCaptionAfter: 'After: Hasil pencarian setelah optimasi',
+  serpCaptionAfter2: 'After: Lanjutan hasil pencarian setelah optimasi',
   socialMediaStats: [],
   counterContent: [],
   newsProduction: [],

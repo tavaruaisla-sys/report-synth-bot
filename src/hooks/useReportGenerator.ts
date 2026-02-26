@@ -31,9 +31,11 @@ export function useReportGenerator({
   });
   const [aiSummary, setAiSummary] = useState<string>('');
   const [screenshotPreviews, setScreenshotPreviews] = useState<{
-    before?: string;
-    after?: string;
-  }>({});
+    before: string[];
+    before2: string[];
+    after: string[];
+    after2: string[];
+  }>({ before: [], before2: [], after: [], after2: [] });
 
   // Build preview data for the preview component
   const previewData: ReportData = useMemo(() => ({
@@ -68,10 +70,14 @@ export function useReportGenerator({
     socialMediaCounterTotalViews: formData.socialMediaCounterTotalViews,
     socialMediaCounterTotalEngagement: formData.socialMediaCounterTotalEngagement,
     serpScreenshotBefore: screenshotPreviews.before,
+    serpScreenshotBefore2: screenshotPreviews.before2,
     serpScreenshotAfter: screenshotPreviews.after,
+    serpScreenshotAfter2: screenshotPreviews.after2,
     serpCaptions: {
       before: formData.serpCaptionBefore,
+      before2: formData.serpCaptionBefore2,
       after: formData.serpCaptionAfter,
+      after2: formData.serpCaptionAfter2,
     },
     aiSummary: aiSummary || undefined,
     socialMediaStats: formData.socialMediaStats,
@@ -92,24 +98,62 @@ export function useReportGenerator({
 
     setIsSaving(true);
     try {
-      // Handle image uploads if they are Files
-      let screenshotBeforeUrl = previewData.serpScreenshotBefore;
-      if (formData.serpScreenshotBefore instanceof File) {
-        const url = await reportService.uploadImage(formData.serpScreenshotBefore);
-        if (url) screenshotBeforeUrl = url;
-      }
+    // Handle image uploads if they are Files
+    let screenshotBeforeUrls: string[] = [];
+    if (Array.isArray(formData.serpScreenshotBefore)) {
+        for (const item of formData.serpScreenshotBefore) {
+            if (item instanceof File) {
+                const url = await reportService.uploadImage(item);
+                if (url) screenshotBeforeUrls.push(url);
+            } else {
+                screenshotBeforeUrls.push(item);
+            }
+        }
+    }
 
-      let screenshotAfterUrl = previewData.serpScreenshotAfter;
-      if (formData.serpScreenshotAfter instanceof File) {
-        const url = await reportService.uploadImage(formData.serpScreenshotAfter);
-        if (url) screenshotAfterUrl = url;
-      }
+    let screenshotBefore2Urls: string[] = [];
+    if (Array.isArray(formData.serpScreenshotBefore2)) {
+        for (const item of formData.serpScreenshotBefore2) {
+            if (item instanceof File) {
+                const url = await reportService.uploadImage(item);
+                if (url) screenshotBefore2Urls.push(url);
+            } else {
+                screenshotBefore2Urls.push(item);
+            }
+        }
+    }
+
+    let screenshotAfterUrls: string[] = [];
+    if (Array.isArray(formData.serpScreenshotAfter)) {
+        for (const item of formData.serpScreenshotAfter) {
+            if (item instanceof File) {
+                const url = await reportService.uploadImage(item);
+                if (url) screenshotAfterUrls.push(url);
+            } else {
+                screenshotAfterUrls.push(item);
+            }
+        }
+    }
+
+    let screenshotAfter2Urls: string[] = [];
+    if (Array.isArray(formData.serpScreenshotAfter2)) {
+        for (const item of formData.serpScreenshotAfter2) {
+            if (item instanceof File) {
+                const url = await reportService.uploadImage(item);
+                if (url) screenshotAfter2Urls.push(url);
+            } else {
+                screenshotAfter2Urls.push(item);
+            }
+        }
+    }
 
       // Prepare data to save
       const reportDataToSave: ReportData = {
         ...previewData,
-        serpScreenshotBefore: screenshotBeforeUrl,
-        serpScreenshotAfter: screenshotAfterUrl,
+        serpScreenshotBefore: screenshotBeforeUrls,
+        serpScreenshotBefore2: screenshotBefore2Urls,
+        serpScreenshotAfter: screenshotAfterUrls,
+        serpScreenshotAfter2: screenshotAfter2Urls,
       };
 
       let savedReport: DBReport | null = null;
@@ -124,17 +168,19 @@ export function useReportGenerator({
         setCurrentReportId(savedReport.id);
         
         // Update local state with URLs if images were uploaded
-        if (screenshotBeforeUrl !== previewData.serpScreenshotBefore || screenshotAfterUrl !== previewData.serpScreenshotAfter) {
-            setFormData(prev => ({
-                ...prev,
-                serpScreenshotBefore: screenshotBeforeUrl || prev.serpScreenshotBefore,
-                serpScreenshotAfter: screenshotAfterUrl || prev.serpScreenshotAfter
-            }));
-            setScreenshotPreviews({
-                before: screenshotBeforeUrl,
-                after: screenshotAfterUrl
-            });
-        }
+        setFormData(prev => ({
+            ...prev,
+            serpScreenshotBefore: screenshotBeforeUrls,
+            serpScreenshotBefore2: screenshotBefore2Urls,
+            serpScreenshotAfter: screenshotAfterUrls,
+            serpScreenshotAfter2: screenshotAfter2Urls,
+        }));
+        setScreenshotPreviews({
+            before: screenshotBeforeUrls,
+            before2: screenshotBefore2Urls,
+            after: screenshotAfterUrls,
+            after2: screenshotAfter2Urls,
+        });
 
         toast({
           title: "Success",
@@ -171,9 +217,21 @@ export function useReportGenerator({
       socialMediaCounterTotalViews: data.socialMediaCounterTotalViews || '',
       socialMediaCounterTotalEngagement: data.socialMediaCounterTotalEngagement || '',
       serpCaptionBefore: data.serpCaptions?.before || defaultReportFormData.serpCaptionBefore,
+      serpCaptionBefore2: data.serpCaptions?.before2 || defaultReportFormData.serpCaptionBefore2,
       serpCaptionAfter: data.serpCaptions?.after || defaultReportFormData.serpCaptionAfter,
-      serpScreenshotBefore: data.serpScreenshotBefore,
-      serpScreenshotAfter: data.serpScreenshotAfter,
+      serpCaptionAfter2: data.serpCaptions?.after2 || defaultReportFormData.serpCaptionAfter2,
+      serpScreenshotBefore: Array.isArray(data.serpScreenshotBefore) 
+        ? data.serpScreenshotBefore 
+        : data.serpScreenshotBefore ? [data.serpScreenshotBefore] : [],
+      serpScreenshotBefore2: Array.isArray(data.serpScreenshotBefore2)
+        ? data.serpScreenshotBefore2
+        : data.serpScreenshotBefore2 ? [data.serpScreenshotBefore2] : [],
+      serpScreenshotAfter: Array.isArray(data.serpScreenshotAfter)
+        ? data.serpScreenshotAfter
+        : data.serpScreenshotAfter ? [data.serpScreenshotAfter] : [],
+      serpScreenshotAfter2: Array.isArray(data.serpScreenshotAfter2)
+        ? data.serpScreenshotAfter2
+        : data.serpScreenshotAfter2 ? [data.serpScreenshotAfter2] : [],
       socialMediaStats: data.socialMediaStats || [],
       counterContent: data.counterContent || [],
       newsProduction: data.newsProduction || [],
@@ -184,8 +242,18 @@ export function useReportGenerator({
     setAiSummary(data.aiSummary || '');
     
     setScreenshotPreviews({
-      before: data.serpScreenshotBefore,
-      after: data.serpScreenshotAfter,
+      before: Array.isArray(data.serpScreenshotBefore) 
+        ? data.serpScreenshotBefore 
+        : data.serpScreenshotBefore ? [data.serpScreenshotBefore] : [],
+      before2: Array.isArray(data.serpScreenshotBefore2)
+        ? data.serpScreenshotBefore2
+        : data.serpScreenshotBefore2 ? [data.serpScreenshotBefore2] : [],
+      after: Array.isArray(data.serpScreenshotAfter)
+        ? data.serpScreenshotAfter
+        : data.serpScreenshotAfter ? [data.serpScreenshotAfter] : [],
+      after2: Array.isArray(data.serpScreenshotAfter2)
+        ? data.serpScreenshotAfter2
+        : data.serpScreenshotAfter2 ? [data.serpScreenshotAfter2] : [],
     });
     
     toast({
@@ -195,11 +263,18 @@ export function useReportGenerator({
   };
 
   // Handle screenshot preview updates
-  const updateScreenshotPreview = async (file: File, type: 'before' | 'after') => {
+  const updateScreenshotPreview = async (file: File, type: 'before' | 'before2' | 'after' | 'after2') => {
     const base64 = await fileToBase64(file);
     setScreenshotPreviews(prev => ({
       ...prev,
-      [type]: base64,
+      [type]: [...(prev[type] || []), base64],
+    }));
+  };
+
+  const removeScreenshotPreview = (index: number, type: 'before' | 'before2' | 'after' | 'after2') => {
+    setScreenshotPreviews(prev => ({
+      ...prev,
+      [type]: prev[type].filter((_, i) => i !== index),
     }));
   };
 
@@ -367,19 +442,53 @@ export function useReportGenerator({
 
     try {
       // Process screenshots if they are files
-      let screenshotBefore: string | undefined;
-      let screenshotAfter: string | undefined;
+      let screenshotBefore: string[] = [];
+      let screenshotBefore2: string[] = [];
+      let screenshotAfter: string[] = [];
+      let screenshotAfter2: string[] = [];
 
-      if (formData.serpScreenshotBefore instanceof File) {
-        screenshotBefore = await fileToBase64(formData.serpScreenshotBefore);
-      } else if (typeof formData.serpScreenshotBefore === 'string') {
-        screenshotBefore = formData.serpScreenshotBefore;
+      if (Array.isArray(formData.serpScreenshotBefore)) {
+          for (const item of formData.serpScreenshotBefore) {
+              if (item instanceof File) {
+                  const base64 = await fileToBase64(item);
+                  screenshotBefore.push(base64);
+              } else {
+                  screenshotBefore.push(item);
+              }
+          }
       }
 
-      if (formData.serpScreenshotAfter instanceof File) {
-        screenshotAfter = await fileToBase64(formData.serpScreenshotAfter);
-      } else if (typeof formData.serpScreenshotAfter === 'string') {
-        screenshotAfter = formData.serpScreenshotAfter;
+      if (Array.isArray(formData.serpScreenshotBefore2)) {
+          for (const item of formData.serpScreenshotBefore2) {
+              if (item instanceof File) {
+                  const base64 = await fileToBase64(item);
+                  screenshotBefore2.push(base64);
+              } else {
+                  screenshotBefore2.push(item);
+              }
+          }
+      }
+
+      if (Array.isArray(formData.serpScreenshotAfter)) {
+          for (const item of formData.serpScreenshotAfter) {
+              if (item instanceof File) {
+                  const base64 = await fileToBase64(item);
+                  screenshotAfter.push(base64);
+              } else {
+                  screenshotAfter.push(item);
+              }
+          }
+      }
+
+      if (Array.isArray(formData.serpScreenshotAfter2)) {
+          for (const item of formData.serpScreenshotAfter2) {
+              if (item instanceof File) {
+                  const base64 = await fileToBase64(item);
+                  screenshotAfter2.push(base64);
+              } else {
+                  screenshotAfter2.push(item);
+              }
+          }
       }
 
       // Build report data
@@ -415,10 +524,14 @@ export function useReportGenerator({
         socialMediaCounterTotalViews: formData.socialMediaCounterTotalViews,
         socialMediaCounterTotalEngagement: formData.socialMediaCounterTotalEngagement,
         serpScreenshotBefore: screenshotBefore,
+        serpScreenshotBefore2: screenshotBefore2,
         serpScreenshotAfter: screenshotAfter,
+        serpScreenshotAfter2: screenshotAfter2,
         serpCaptions: {
           before: formData.serpCaptionBefore,
+          before2: formData.serpCaptionBefore2,
           after: formData.serpCaptionAfter,
+          after2: formData.serpCaptionAfter2,
         },
         aiSummary: aiSummary || undefined,
         socialMediaStats: formData.socialMediaStats,
@@ -466,6 +579,7 @@ export function useReportGenerator({
     isGenerating,
     previewData,
     updateScreenshotPreview,
+    removeScreenshotPreview,
     saveReport,
     isSaving,
     loadReport,

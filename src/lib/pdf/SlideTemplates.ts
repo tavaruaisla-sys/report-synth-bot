@@ -194,7 +194,7 @@ export const createSectionDivider = (doc: jsPDF, title: string, subtitle?: strin
 // SLIDE 4-5: SERP Screenshots
 export const createScreenshotSlide = (
   doc: jsPDF, 
-  imageData: string | undefined, 
+  images: string[] | undefined, 
   caption: string, 
   type: 'before' | 'after',
   pageNum: number, 
@@ -205,20 +205,40 @@ export const createScreenshotSlide = (
   
   const contentY = SLIDE_CONFIG.headerHeight + 10;
   const contentHeight = SLIDE_CONFIG.height - SLIDE_CONFIG.headerHeight - SLIDE_CONFIG.footerHeight - 30;
+  const contentWidth = SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2;
   
-  if (imageData) {
-    try {
-      const imgWidth = SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2;
-      const imgHeight = contentHeight - 20;
-      doc.addImage(imageData, 'JPEG', SLIDE_CONFIG.margin, contentY, imgWidth, imgHeight);
-    } catch (e) {
-      // Placeholder if image fails
-      doc.setFillColor('#f0f0f0');
-      doc.rect(SLIDE_CONFIG.margin, contentY, SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2, contentHeight - 20, 'F');
-      doc.setFontSize(12);
-      doc.setTextColor(REPORT_COLORS.textLight);
-      doc.text('Screenshot not available', SLIDE_CONFIG.width / 2, contentY + contentHeight / 2, { align: 'center' });
-    }
+  if (images && images.length > 0) {
+    // Grid Layout Logic
+    const count = Math.min(images.length, 6);
+    let cols = 1;
+    let rows = 1;
+    
+    if (count === 2) { cols = 2; rows = 1; }
+    else if (count >= 3 && count <= 4) { cols = 2; rows = 2; }
+    else if (count >= 5) { cols = 3; rows = 2; }
+    
+    const gap = 5;
+    const cellWidth = (contentWidth - (cols - 1) * gap) / cols;
+    const cellHeight = (contentHeight - (rows - 1) * gap) / rows;
+    
+    images.slice(0, 6).forEach((imgData, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      
+      const x = SLIDE_CONFIG.margin + col * (cellWidth + gap);
+      const y = contentY + row * (cellHeight + gap);
+      
+      try {
+        doc.addImage(imgData, 'JPEG', x, y, cellWidth, cellHeight);
+        // Add border
+        doc.setDrawColor(220, 220, 220);
+        doc.rect(x, y, cellWidth, cellHeight);
+      } catch (e) {
+        // Fallback if image fails
+        doc.setFillColor('#f0f0f0');
+        doc.rect(x, y, cellWidth, cellHeight, 'F');
+      }
+    });
   } else {
     // Placeholder
     doc.setFillColor('#f0f0f0');
@@ -235,6 +255,65 @@ export const createScreenshotSlide = (
   doc.text(caption, SLIDE_CONFIG.width / 2, SLIDE_CONFIG.height - SLIDE_CONFIG.footerHeight - 8, { align: 'center' });
   
   drawFooter(doc, 'RP Report');
+};
+
+// SLIDE 5: After Screenshot (Special Layout)
+export const createAfterSlide = (
+  doc: jsPDF, 
+  images: string[] | undefined, 
+  title: string,
+  pageNum: number, 
+  totalPages: number
+): void => {
+  addNewSlide(doc);
+  
+  // Background: White
+  doc.setFillColor('#ffffff');
+  doc.rect(0, 0, SLIDE_CONFIG.width, SLIDE_CONFIG.height, 'F');
+  
+  // Title
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(28); // Large title
+  doc.setTextColor('#0f172a'); // Dark navy
+  doc.text(title, SLIDE_CONFIG.margin, 30);
+  
+  const contentY = 45;
+  const contentHeight = SLIDE_CONFIG.height - contentY - 20;
+  const contentWidth = SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2;
+  
+  if (images && images.length > 0) {
+    // 3-Column Layout (Optimized for vertical screenshots)
+    const cols = 3;
+    const gap = 10;
+    const cellWidth = (contentWidth - (cols - 1) * gap) / cols;
+    
+    // Use up to 3 images for the main row
+    images.slice(0, 3).forEach((imgData, index) => {
+      const x = SLIDE_CONFIG.margin + index * (cellWidth + gap);
+      const y = contentY;
+      
+      try {
+        // Draw image
+        doc.addImage(imgData, 'JPEG', x, y, cellWidth, contentHeight);
+        
+        // Add subtle shadow/border
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.5);
+        doc.rect(x, y, cellWidth, contentHeight);
+      } catch (e) {
+        // Fallback
+        doc.setFillColor('#f0f0f0');
+        doc.rect(x, y, cellWidth, contentHeight, 'F');
+      }
+    });
+  } else {
+     // Placeholder
+    doc.setFillColor('#f0f0f0');
+    doc.rect(SLIDE_CONFIG.margin, contentY, contentWidth, contentHeight, 'F');
+    doc.setFontSize(12);
+    doc.setTextColor(REPORT_COLORS.textLight);
+    doc.text('No screenshot uploaded', SLIDE_CONFIG.width / 2, contentY + contentHeight / 2, { align: 'center' });
+  }
 };
 
 // SLIDE 6: AI Summary

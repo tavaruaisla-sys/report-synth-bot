@@ -8,7 +8,7 @@ import {
   createExecutiveSummarySlide,
   createSectionDivider,
   createScreenshotSlide,
-  createAISummarySlide,
+  createAfterSlide,
   createDataSummarySlide,
   createSocialMediaStatsSlide,
   createCounterContentSlide,
@@ -76,24 +76,36 @@ export class ReportPDFGenerator {
     
     // SLIDE 5: After Screenshot
     currentPage++;
-    createScreenshotSlide(
+    createAfterSlide(
       this.doc, 
       this.data.serpScreenshotAfter, 
-      this.data.serpCaptions?.after || 'After optimization',
-      'after',
+      `AFTER - ${this.data.updateDate.toUpperCase()}`,
+      currentPage, 
+      this.totalPages
+    );
+
+    // SLIDE 6: AI Result - Before
+    currentPage++;
+    createScreenshotSlide(
+      this.doc, 
+      this.data.serpScreenshotBefore2, 
+      this.data.serpCaptions?.before2 || 'AI Result - Before',
+      'before',
       currentPage, 
       this.totalPages
     );
     
-    // SLIDE 6: AI Summary
+    // SLIDE 7: AI Result - After
     currentPage++;
-    createAISummarySlide(this.doc, this.data, currentPage, this.totalPages);
+    createAfterSlide(
+      this.doc, 
+      this.data.serpScreenshotAfter2, 
+      `AI RESULT - AFTER`,
+      currentPage, 
+      this.totalPages
+    );
     
-    // SLIDE 7: Appendix Divider
-    createSectionDivider(this.doc, 'APPENDIX', 'Data summary and production links');
-    currentPage++;
-    
-    // SLIDE 8: Data Summary
+    // SLIDE 6: Data Summary
     currentPage++;
     createDataSummarySlide(this.doc, this.data, currentPage, this.totalPages);
     

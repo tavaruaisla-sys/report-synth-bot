@@ -111,80 +111,142 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
       {/* Slide 4: Before Screenshot */}
       <SlideWrapper>
         <SlideHeader title="GOOGLE SEARCH - BEFORE" pageNum={4} />
-        <div className="p-4 flex-1 flex flex-col">
-          <div className="flex-1 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-            {data.serpScreenshotBefore ? (
-              <img 
-                src={data.serpScreenshotBefore} 
-                alt="Before screenshot" 
-                className="max-h-full max-w-full object-contain"
-              />
+        <div className="p-4 flex-1 flex flex-col h-full overflow-hidden">
+          <div className="flex-1 bg-muted/30 rounded-lg overflow-hidden border-2 border-dashed border-border p-2 min-h-0">
+            {data.serpScreenshotBefore && data.serpScreenshotBefore.length > 0 ? (
+              <div className={`grid gap-2 w-full h-full ${
+                data.serpScreenshotBefore.length === 1 ? 'grid-cols-1' :
+                data.serpScreenshotBefore.length === 2 ? 'grid-cols-2' :
+                data.serpScreenshotBefore.length <= 4 ? 'grid-cols-2 grid-rows-2' :
+                'grid-cols-3 grid-rows-2'
+              }`}>
+                {data.serpScreenshotBefore.slice(0, 6).map((src, i) => (
+                   <div key={i} className="relative w-full h-full min-h-0 flex items-center justify-center bg-white rounded-sm overflow-hidden">
+                     <img 
+                       src={src} 
+                       alt={`Before screenshot ${i+1}`} 
+                       className="max-w-full max-h-full object-contain"
+                     />
+                   </div>
+                ))}
+              </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No screenshot uploaded</p>
+              <div className="h-full flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">No screenshot uploaded</p>
+              </div>
             )}
           </div>
-          <p className="text-xs text-center text-muted-foreground mt-2 italic">
+          <p className="text-xs text-center text-muted-foreground mt-2 italic shrink-0">
             {data.serpCaptions?.before || 'Before optimization'}
           </p>
         </div>
       </SlideWrapper>
 
-      {/* Slide 5: After Screenshot */}
+      {/* Slide 5: After Screenshot (New Layout) */}
       <SlideWrapper>
-        <SlideHeader title="GOOGLE SEARCH - AFTER" pageNum={5} />
-        <div className="p-4 flex-1 flex flex-col">
-          <div className="flex-1 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-            {data.serpScreenshotAfter ? (
-              <img 
-                src={data.serpScreenshotAfter} 
-                alt="After screenshot" 
-                className="max-h-full max-w-full object-contain"
-              />
+        <div className="flex flex-col h-full bg-white p-8">
+          {/* Title */}
+          <h2 className="text-3xl font-bold text-[#0f172a] uppercase mb-6 text-left">
+            AFTER - {data.updateDate}
+          </h2>
+          
+          {/* Content */}
+          <div className="flex-1 min-h-0">
+            {data.serpScreenshotAfter && data.serpScreenshotAfter.length > 0 ? (
+              <div className="grid grid-cols-3 gap-4 h-full">
+                {data.serpScreenshotAfter.slice(0, 3).map((src, i) => (
+                   <div key={i} className="relative w-full h-full min-h-0 bg-white border border-gray-200 shadow-sm rounded-sm overflow-hidden">
+                     <img 
+                       src={src} 
+                       alt={`After screenshot ${i+1}`} 
+                       className="w-full h-full object-cover object-top"
+                     />
+                   </div>
+                ))}
+                {/* Fill empty slots if less than 3 images to maintain grid structure */}
+                {[...Array(Math.max(0, 3 - data.serpScreenshotAfter.length))].map((_, i) => (
+                  <div key={`empty-${i}`} className="bg-gray-50 border border-dashed border-gray-200 rounded-sm" />
+                ))}
+              </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No screenshot uploaded</p>
+              <div className="h-full flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
+                <p className="text-sm text-gray-400">No screenshot uploaded</p>
+              </div>
             )}
           </div>
-          <p className="text-xs text-center text-muted-foreground mt-2 italic">
-            {data.serpCaptions?.after || 'After optimization'}
+        </div>
+      </SlideWrapper>
+
+      {/* Slide 6: AI Result - Before */}
+      <SlideWrapper>
+        <SlideHeader title="AI RESULT - BEFORE" pageNum={6} />
+        <div className="p-4 flex-1 flex flex-col h-full overflow-hidden">
+          <div className="flex-1 bg-muted/30 rounded-lg overflow-hidden border-2 border-dashed border-border p-2 min-h-0">
+            {data.serpScreenshotBefore2 && data.serpScreenshotBefore2.length > 0 ? (
+              <div className={`grid gap-2 w-full h-full ${
+                data.serpScreenshotBefore2.length === 1 ? 'grid-cols-1' :
+                data.serpScreenshotBefore2.length === 2 ? 'grid-cols-2' :
+                data.serpScreenshotBefore2.length <= 4 ? 'grid-cols-2 grid-rows-2' :
+                'grid-cols-3 grid-rows-2'
+              }`}>
+                {data.serpScreenshotBefore2.slice(0, 6).map((src, i) => (
+                   <div key={i} className="relative w-full h-full min-h-0 flex items-center justify-center bg-white rounded-sm overflow-hidden">
+                     <img 
+                       src={src} 
+                       alt={`AI Result Before ${i+1}`} 
+                       className="max-w-full max-h-full object-contain"
+                     />
+                   </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">No screenshot uploaded (AI Result Before)</p>
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-center text-muted-foreground mt-2 italic shrink-0">
+            {data.serpCaptions?.before2 || 'AI Result - Before'}
           </p>
         </div>
       </SlideWrapper>
 
-      {/* Slide 6: AI Summary */}
+      {/* Slide 7: AI Result - After */}
       <SlideWrapper>
-        <SlideHeader title="AI ANALYSIS SUMMARY" pageNum={6} />
-        <div className="p-4 flex-1">
-          {data.aiSummary ? (
-            <div className="text-xs leading-relaxed whitespace-pre-wrap">
-              {data.aiSummary}
-            </div>
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">AI summary not generated</p>
+        <div className="flex flex-col h-full bg-white p-8">
+          {/* Title */}
+          <h2 className="text-3xl font-bold text-[#0f172a] uppercase mb-6 text-left">
+            AI RESULT - AFTER
+          </h2>
+          
+          {/* Content */}
+          <div className="flex-1 min-h-0">
+            {data.serpScreenshotAfter2 && data.serpScreenshotAfter2.length > 0 ? (
+              <div className="grid grid-cols-3 gap-4 h-full">
+                {data.serpScreenshotAfter2.slice(0, 3).map((src, i) => (
+                   <div key={i} className="relative w-full h-full min-h-0 bg-white border border-gray-200 shadow-sm rounded-sm overflow-hidden">
+                     <img 
+                       src={src} 
+                       alt={`AI Result After ${i+1}`} 
+                       className="w-full h-full object-cover object-top"
+                     />
+                   </div>
+                ))}
+                {/* Fill empty slots if less than 3 images to maintain grid structure */}
+                {[...Array(Math.max(0, 3 - data.serpScreenshotAfter2.length))].map((_, i) => (
+                  <div key={`empty-${i}`} className="bg-gray-50 border border-dashed border-gray-200 rounded-sm" />
+                ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="h-full flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
+                <p className="text-sm text-gray-400">No screenshot uploaded (AI Result After)</p>
+              </div>
+            )}
+          </div>
         </div>
       </SlideWrapper>
 
-      {/* Slide 7: Appendix Divider */}
-      <SlideWrapper>
-        <div 
-          className="h-full flex flex-col items-center justify-center text-white"
-          style={{ backgroundColor: REPORT_COLORS.primary }}
-        >
-          <div 
-            className="w-16 h-1 mb-4"
-            style={{ backgroundColor: REPORT_COLORS.accent }}
-          />
-          <h2 className="text-3xl font-bold">APPENDIX</h2>
-          <p className="text-sm opacity-70 mt-2">Data summary and production links</p>
-        </div>
-      </SlideWrapper>
-
-      {/* Slide 8: Data Summary */}
+      {/* Slide 6: Data Summary */}
       <SlideWrapper>
         <SlideHeader title="DATA SUMMARY" pageNum={8} />
         <div className="p-4">

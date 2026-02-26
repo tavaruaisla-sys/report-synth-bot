@@ -28,7 +28,8 @@ interface ReportDataFormProps {
   onGenerateReport: () => void;
   isGenerating: boolean;
   previewData: ReportData;
-  onUpdateScreenshotPreview: (file: File, type: 'before' | 'after') => void;
+  onUpdateScreenshotPreview: (file: File, type: 'before' | 'before2' | 'after' | 'after2') => void;
+  onRemoveScreenshotPreview: (index: number, type: 'before' | 'before2' | 'after' | 'after2') => void;
   googleScreenshots?: { file: File; preview: string }[];
   onSave: () => void;
   isSaving: boolean;
@@ -52,6 +53,7 @@ const ReportDataForm = ({
   isGenerating,
   previewData,
   onUpdateScreenshotPreview,
+  onRemoveScreenshotPreview,
   googleScreenshots: externalScreenshots,
   onSave,
   isSaving,
@@ -106,12 +108,36 @@ const ReportDataForm = ({
     onGenerateNewsDescription(allImages.length > 0 ? allImages : undefined);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'serpScreenshotBefore' | 'serpScreenshotAfter') => {
-    const file = e.target.files?.[0];
-    if (file) {
-      onUpdateFormData({ [field]: file });
-      const type = field === 'serpScreenshotBefore' ? 'before' : 'after';
-      onUpdateScreenshotPreview(file, type);
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'serpScreenshotBefore' | 'serpScreenshotBefore2' | 'serpScreenshotAfter' | 'serpScreenshotAfter2') => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const currentFiles = formData[field] || [];
+      // Cast currentFiles to array to avoid type error if it's undefined
+      const newFiles = [...(Array.isArray(currentFiles) ? currentFiles : []), ...files];
+      
+      onUpdateFormData({ [field]: newFiles });
+      
+      const type = field === 'serpScreenshotBefore' ? 'before' : 
+                   field === 'serpScreenshotBefore2' ? 'before2' :
+                   field === 'serpScreenshotAfter' ? 'after' : 'after2';
+      files.forEach(file => {
+        onUpdateScreenshotPreview(file, type);
+      });
+    }
+    // Reset input value to allow uploading same file again
+    if (e.target) e.target.value = '';
+  };
+
+  const handleRemoveScreenshot = (index: number, field: 'serpScreenshotBefore' | 'serpScreenshotBefore2' | 'serpScreenshotAfter' | 'serpScreenshotAfter2') => {
+    const currentFiles = formData[field];
+    if (Array.isArray(currentFiles)) {
+      const newFiles = currentFiles.filter((_, i) => i !== index);
+      onUpdateFormData({ [field]: newFiles });
+      
+      const type = field === 'serpScreenshotBefore' ? 'before' : 
+                   field === 'serpScreenshotBefore2' ? 'before2' :
+                   field === 'serpScreenshotAfter' ? 'after' : 'after2';
+      onRemoveScreenshotPreview(index, type);
     }
   };
 
@@ -150,7 +176,7 @@ const ReportDataForm = ({
                 <span className="hidden sm:inline">Slide 4-5:</span> SERP
               </TabsTrigger>
               <TabsTrigger value="ai" className="text-xs">
-                <span className="hidden sm:inline">Slide 6-7:</span> AI
+                <span className="hidden sm:inline">Slide 6-7:</span> AI Result
               </TabsTrigger>
               <TabsTrigger value="data" className="text-xs">
                 <span className="hidden sm:inline">Slide 9:</span> Data
@@ -358,23 +384,47 @@ const ReportDataForm = ({
                         <span className="bg-destructive/20 text-destructive text-xs px-2 py-0.5 rounded">Slide 4</span>
                         Before - Hasil Negatif
                       </Label>
+                      
+                      {/* Upload Area */}
                       <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
                         <input
                           type="file"
                           accept="image/*"
+                          multiple
                           onChange={(e) => handleFileUpload(e, 'serpScreenshotBefore')}
                           className="hidden"
                           id="screenshot-before"
                         />
-                        <label htmlFor="screenshot-before" className="cursor-pointer">
+                        <label htmlFor="screenshot-before" className="cursor-pointer block w-full h-full">
                           <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                           <p className="text-sm text-muted-foreground">
-                            {formData.serpScreenshotBefore instanceof File 
-                              ? formData.serpScreenshotBefore.name 
-                              : 'Click to upload'}
+                            Click to upload screenshots (Multiple allowed)
                           </p>
                         </label>
                       </div>
+
+                      {/* Preview Grid */}
+                      {previewData.serpScreenshotBefore && previewData.serpScreenshotBefore.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                          {previewData.serpScreenshotBefore.map((src, index) => (
+                            <div key={index} className="relative group rounded-md overflow-hidden border border-border bg-muted">
+                              <img
+                                src={src}
+                                alt={`Before screenshot ${index + 1}`}
+                                className="w-full h-20 object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveScreenshot(index, 'serpScreenshotBefore')}
+                                className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       <Input
                         value={formData.serpCaptionBefore}
                         onChange={(e) => onUpdateFormData({ serpCaptionBefore: e.target.value })}
@@ -388,23 +438,47 @@ const ReportDataForm = ({
                         <span className="bg-primary/20 text-primary text-xs px-2 py-0.5 rounded">Slide 5</span>
                         After - Hasil Bersih
                       </Label>
+                      
+                      {/* Upload Area */}
                       <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
                         <input
                           type="file"
                           accept="image/*"
+                          multiple
                           onChange={(e) => handleFileUpload(e, 'serpScreenshotAfter')}
                           className="hidden"
                           id="screenshot-after"
                         />
-                        <label htmlFor="screenshot-after" className="cursor-pointer">
+                        <label htmlFor="screenshot-after" className="cursor-pointer block w-full h-full">
                           <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                           <p className="text-sm text-muted-foreground">
-                            {formData.serpScreenshotAfter instanceof File 
-                              ? formData.serpScreenshotAfter.name 
-                              : 'Click to upload'}
+                            Click to upload screenshots (Multiple allowed)
                           </p>
                         </label>
                       </div>
+
+                      {/* Preview Grid */}
+                      {previewData.serpScreenshotAfter && previewData.serpScreenshotAfter.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                          {previewData.serpScreenshotAfter.map((src, index) => (
+                            <div key={index} className="relative group rounded-md overflow-hidden border border-border bg-muted">
+                              <img
+                                src={src}
+                                alt={`After screenshot ${index + 1}`}
+                                className="w-full h-20 object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveScreenshot(index, 'serpScreenshotAfter')}
+                                className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       <Input
                         value={formData.serpCaptionAfter}
                         onChange={(e) => onUpdateFormData({ serpCaptionAfter: e.target.value })}
@@ -416,38 +490,128 @@ const ReportDataForm = ({
               </Card>
             </TabsContent>
             
-            {/* Slide 6-7: AI Analysis */}
+            {/* Slide 6-7: AI Result */}
             <TabsContent value="ai" className="space-y-4 mt-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                <Sparkles className="h-4 w-4" />
-                <span>Slide 6-7: AI Analysis Summary (Perplexity Style)</span>
+                <Image className="h-4 w-4" />
+                <span>Slide 6: AI Result Before | Slide 7: AI Result After</span>
               </div>
               
               <Card>
                 <CardHeader className="py-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-accent" />
-                    Generate AI Summary
+                    <Image className="h-4 w-4" />
+                    AI Result Screenshots
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-xs text-muted-foreground">
-                    AI akan menganalisis keyword brand dan hasil pencarian untuk membuat ringkasan reputasi.
-                  </p>
-                  <Button 
-                    onClick={onGenerateAiSummary} 
-                    disabled={isGeneratingAiSummary}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    {isGeneratingAiSummary ? "Generating..." : "Generate AI Summary"}
-                  </Button>
-                  {aiSummary && (
-                    <div className="rounded-lg bg-muted p-3 text-sm whitespace-pre-wrap max-h-64 overflow-y-auto">
-                      {aiSummary}
+                <CardContent className="space-y-4">
+                    {/* Slide 6: AI Result - Before */}
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <span className="bg-destructive/20 text-destructive text-xs px-2 py-0.5 rounded">Slide 6</span>
+                        AI Result - Before
+                      </Label>
+                      
+                      {/* Upload Area */}
+                      <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => handleFileUpload(e, 'serpScreenshotBefore2')}
+                          className="hidden"
+                          id="screenshot-before-2"
+                        />
+                        <label htmlFor="screenshot-before-2" className="cursor-pointer block w-full h-full">
+                          <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground">
+                            Click to upload screenshots (Multiple allowed)
+                          </p>
+                        </label>
+                      </div>
+
+                      {/* Preview Grid */}
+                      {previewData.serpScreenshotBefore2 && previewData.serpScreenshotBefore2.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                          {previewData.serpScreenshotBefore2.map((src, index) => (
+                            <div key={index} className="relative group rounded-md overflow-hidden border border-border bg-muted">
+                              <img
+                                src={src}
+                                alt={`Before 2 screenshot ${index + 1}`}
+                                className="w-full h-20 object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveScreenshot(index, 'serpScreenshotBefore2')}
+                                className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <Input
+                        value={formData.serpCaptionBefore2}
+                        onChange={(e) => onUpdateFormData({ serpCaptionBefore2: e.target.value })}
+                        placeholder="Contoh: AI Result Before - 3 Feb 2026"
+                      />
                     </div>
-                  )}
+
+                    {/* Slide 7: AI Result - After */}
+                    <div className="space-y-2 pt-4 border-t border-border">
+                      <Label className="flex items-center gap-2">
+                        <span className="bg-primary/20 text-primary text-xs px-2 py-0.5 rounded">Slide 7</span>
+                        AI Result - After
+                      </Label>
+                      
+                      {/* Upload Area */}
+                      <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => handleFileUpload(e, 'serpScreenshotAfter2')}
+                          className="hidden"
+                          id="screenshot-after-2"
+                        />
+                        <label htmlFor="screenshot-after-2" className="cursor-pointer block w-full h-full">
+                          <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground">
+                            Click to upload screenshots (Multiple allowed)
+                          </p>
+                        </label>
+                      </div>
+
+                      {/* Preview Grid */}
+                      {previewData.serpScreenshotAfter2 && previewData.serpScreenshotAfter2.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                          {previewData.serpScreenshotAfter2.map((src, index) => (
+                            <div key={index} className="relative group rounded-md overflow-hidden border border-border bg-muted">
+                              <img
+                                src={src}
+                                alt={`After 2 screenshot ${index + 1}`}
+                                className="w-full h-20 object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveScreenshot(index, 'serpScreenshotAfter2')}
+                                className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <Input
+                        value={formData.serpCaptionAfter2}
+                        onChange={(e) => onUpdateFormData({ serpCaptionAfter2: e.target.value })}
+                        placeholder="Contoh: AI Result After - 3 Feb 2026"
+                      />
+                    </div>
                 </CardContent>
               </Card>
             </TabsContent>

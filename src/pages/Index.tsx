@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, FileSliders } from "lucide-react";
+import { Sparkles, FileSliders, Search } from "lucide-react";
 import Header from "@/components/layout/Header";
 import KeywordInput from "@/components/report/KeywordInput";
 import SocialMediaInput from "@/components/report/SocialMediaInput";
@@ -150,13 +150,32 @@ const Index = () => {
               </div>
               <SocialMediaInput urls={socialUrls} onUrlsChange={setSocialUrls} />
             </div>
+
+            {/* Search Results - Integrated into left column to avoid overlapping with sidebar */}
+            {(results.length > 0 || isLoading) && (
+              <div className="space-y-4 pt-6 border-t border-border">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/20 text-accent">
+                    <Search className="h-3 w-3" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-foreground">Hasil Analisis Pencarian</h2>
+                </div>
+                <SearchResults 
+                  results={results} 
+                  stats={stats} 
+                  isLoading={isLoading} 
+                />
+              </div>
+            )}
           </div>
 
-          {/* Right Column - Preview */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="space-y-2">
+          {/* Right Column - Preview & Generate (Sticky) */}
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <FileSliders className="h-5 w-5 text-accent" />
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/20 text-accent">
+                  <FileSliders className="h-3 w-3" />
+                </div>
                 <h2 className="text-lg font-semibold text-foreground">Preview & Generate</h2>
               </div>
               <AnalysisPreview
@@ -170,17 +189,6 @@ const Index = () => {
               />
             </div>
           </div>
-
-          {/* Search Results - Full Width */}
-          {(results.length > 0 || isLoading) && (
-            <div className="lg:col-span-3">
-              <SearchResults 
-                results={results} 
-                stats={stats} 
-                isLoading={isLoading} 
-              />
-            </div>
-          )}
         </div>
       </main>
 
