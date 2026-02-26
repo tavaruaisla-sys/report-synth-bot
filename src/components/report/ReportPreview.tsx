@@ -27,9 +27,9 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
         </div>
       </SlideWrapper>
 
-      {/* Slide 2: Executive Summary */}
+      {/* Slide 2: REPUTATION RECOVERY - CURRENT STATUS */}
       <SlideWrapper>
-        <SlideHeader title="EXECUTIVE SUMMARY" pageNum={2} />
+        <SlideHeader title="REPUTATION RECOVERY - CURRENT STATUS" pageNum={2} />
         <div className="p-4 grid grid-cols-2 gap-4">
           {/* News Status */}
           <div className="bg-muted/50 rounded-lg p-3">
