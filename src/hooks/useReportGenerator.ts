@@ -58,10 +58,12 @@ export function useReportGenerator({
       neutralFound: 0,
       sentimentScore: 100,
     },
-    newsStatus: formData.newsStatus,
-    newsDescription: formData.newsDescription,
-    socialMediaStatus: formData.socialMediaStatus,
-    socialMediaDescription: formData.socialMediaDescription,
+    newsBulletPoints: formData.newsBulletPoints,
+    socialMediaAccountStatusBefore: formData.socialMediaAccountStatusBefore,
+    socialMediaAccountStatusAfter: formData.socialMediaAccountStatusAfter,
+    socialMediaAccountStatusNote: formData.socialMediaAccountStatusNote,
+    socialMediaCounterTotalViews: formData.socialMediaCounterTotalViews,
+    socialMediaCounterTotalEngagement: formData.socialMediaCounterTotalEngagement,
     serpScreenshotBefore: screenshotPreviews.before,
     serpScreenshotAfter: screenshotPreviews.after,
     serpCaptions: {
@@ -163,7 +165,10 @@ export function useReportGenerator({
       if (error) throw error;
 
       if (data?.description) {
-        setFormData(prev => ({ ...prev, newsDescription: data.description }));
+        setFormData(prev => ({ 
+          ...prev, 
+          newsBulletPoints: (data.description as string).split('\n').filter(line => line.trim().length > 0) 
+        }));
         toast({
           title: "Deskripsi Generated",
           description: googleScreenshots?.length 
@@ -285,10 +290,12 @@ export function useReportGenerator({
           neutralFound: 0,
           sentimentScore: 100,
         },
-        newsStatus: formData.newsStatus,
-        newsDescription: formData.newsDescription,
-        socialMediaStatus: formData.socialMediaStatus,
-        socialMediaDescription: formData.socialMediaDescription,
+        newsBulletPoints: formData.newsBulletPoints,
+        socialMediaAccountStatusBefore: formData.socialMediaAccountStatusBefore,
+        socialMediaAccountStatusAfter: formData.socialMediaAccountStatusAfter,
+        socialMediaAccountStatusNote: formData.socialMediaAccountStatusNote,
+        socialMediaCounterTotalViews: formData.socialMediaCounterTotalViews,
+        socialMediaCounterTotalEngagement: formData.socialMediaCounterTotalEngagement,
         serpScreenshotBefore: screenshotBefore,
         serpScreenshotAfter: screenshotAfter,
         serpCaptions: {

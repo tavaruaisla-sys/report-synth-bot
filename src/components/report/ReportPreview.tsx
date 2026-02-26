@@ -30,56 +30,66 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
       {/* Slide 2: REPUTATION RECOVERY - CURRENT STATUS */}
       <SlideWrapper>
         <SlideHeader title="REPUTATION RECOVERY - CURRENT STATUS" pageNum={2} />
-        <div className="p-4 grid grid-cols-2 gap-4">
-          {/* News Status */}
-          <div className="bg-muted/50 rounded-lg p-3">
-            <h3 className="font-semibold text-sm mb-2" style={{ color: REPORT_COLORS.primary }}>
+        <div className="p-8 flex flex-col gap-6 h-full overflow-hidden text-black">
+          {/* News Section */}
+          <div className="space-y-2">
+            <h3 className="font-bold text-sm tracking-wide uppercase" style={{ color: REPORT_COLORS.primary }}>
               NEWS / PEMBERITAAN
             </h3>
-            <StatusBadge status={data.newsStatus} />
-            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-              {data.newsDescription || 'No description provided'}
-            </p>
+            <ul className="space-y-1.5 list-none">
+              {data.newsBulletPoints && data.newsBulletPoints.length > 0 ? (
+                data.newsBulletPoints.map((point, i) => (
+                  <li key={i} className="text-[10px] leading-relaxed flex items-start gap-2 text-black">
+                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-black" />
+                    <span>{point}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="text-[10px] text-muted-foreground italic">Belum ada data berita.</li>
+              )}
+            </ul>
           </div>
-          
-          {/* Social Media Status */}
-          <div className="bg-muted/50 rounded-lg p-3">
-            <h3 className="font-semibold text-sm mb-2" style={{ color: REPORT_COLORS.primary }}>
-              SOCIAL MEDIA
+
+          {/* Social Media Section */}
+          <div className="space-y-3">
+            <h3 className="font-bold text-sm tracking-wide uppercase" style={{ color: REPORT_COLORS.primary }}>
+              SOSIAL MEDIA - TIKTOK
             </h3>
-            <SentimentBadge status={data.socialMediaStatus} />
-            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-              {data.socialMediaDescription || 'No description provided'}
-            </p>
-          </div>
-        </div>
-        
-        {/* Stats */}
-        <div className="px-4 pb-4">
-          <h4 className="text-xs font-semibold mb-2" style={{ color: REPORT_COLORS.primary }}>
-            SENTIMENT ANALYSIS
-          </h4>
-          <div className="grid grid-cols-4 gap-2">
-            <StatCard 
-              label="Total" 
-              value={data.sentimentStats.totalResults} 
-              color={REPORT_COLORS.accent} 
-            />
-            <StatCard 
-              label="Negative" 
-              value={data.sentimentStats.negativeFound} 
-              color={REPORT_COLORS.negative} 
-            />
-            <StatCard 
-              label="Positive" 
-              value={data.sentimentStats.positiveFound} 
-              color={REPORT_COLORS.positive} 
-            />
-            <StatCard 
-              label="Score" 
-              value={`${data.sentimentStats.sentimentScore}%`} 
-              color={REPORT_COLORS.primary} 
-            />
+            
+            {/* Aktivitas Akun Lawan */}
+            <div className="space-y-1">
+              <h4 className="font-bold text-[11px] text-black">Aktivitas Akun Lawan</h4>
+              <ul className="space-y-1 list-none ml-1">
+                <li className="text-[10px] flex items-center gap-2 text-black">
+                  <span className="h-1 w-1 rounded-full bg-black" />
+                  <span><span className="font-bold">Sebelum:</span> {data.socialMediaAccountStatusBefore || '-'}</span>
+                </li>
+                <li className="text-[10px] flex items-center gap-2 text-black">
+                  <span className="h-1 w-1 rounded-full bg-black" />
+                  <span><span className="font-bold">Sesudah:</span> {data.socialMediaAccountStatusAfter || '-'}</span>
+                </li>
+              </ul>
+              {data.socialMediaAccountStatusNote && (
+                <p className="text-[10px] italic ml-4 text-black">
+                  {data.socialMediaAccountStatusNote}
+                </p>
+              )}
+            </div>
+
+            {/* Aktivitas Counter Kita */}
+            <div className="space-y-1">
+              <h4 className="font-bold text-[11px] text-black">Aktivitas Counter Kita</h4>
+              <ul className="space-y-1 list-none ml-1">
+                <li className="text-[10px] flex items-center gap-2 text-black">
+                  <span className="h-1 w-1 rounded-full bg-black" />
+                  <span><span className="font-bold">Total views konten counter:</span> {data.socialMediaCounterTotalViews || '-'}</span>
+                </li>
+                <li className="text-[10px] flex items-center gap-2 text-black">
+                  <span className="h-1 w-1 rounded-full bg-black" />
+                  <span><span className="font-bold">Total engagement:</span> {data.socialMediaCounterTotalEngagement || '-'}</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </SlideWrapper>

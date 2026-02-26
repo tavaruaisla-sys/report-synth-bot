@@ -13,10 +13,12 @@ export interface ReportData {
   sentimentStats: SentimentStats;
   
   // Executive Summary Data
-  newsStatus: 'recovery' | 'monitoring' | 'crisis';
-  newsDescription: string;
-  socialMediaStatus: 'positive' | 'neutral' | 'negative';
-  socialMediaDescription: string;
+  newsBulletPoints: string[];
+  socialMediaAccountStatusBefore: string;
+  socialMediaAccountStatusAfter: string;
+  socialMediaAccountStatusNote: string;
+  socialMediaCounterTotalViews: string;
+  socialMediaCounterTotalEngagement: string;
   
   // SERP Screenshots (manual upload)
   serpScreenshotBefore?: string; // base64 or URL
@@ -88,10 +90,12 @@ export interface ReportFormData {
   brandName: string;
   
   // Executive Summary inputs
-  newsStatus: 'recovery' | 'monitoring' | 'crisis';
-  newsDescription: string;
-  socialMediaStatus: 'positive' | 'neutral' | 'negative';
-  socialMediaDescription: string;
+  newsBulletPoints: string[];
+  socialMediaAccountStatusBefore: string;
+  socialMediaAccountStatusAfter: string;
+  socialMediaAccountStatusNote: string;
+  socialMediaCounterTotalViews: string;
+  socialMediaCounterTotalEngagement: string;
   
   // Screenshots (file or URL)
   serpScreenshotBefore?: File | string;
@@ -117,10 +121,12 @@ export interface ReportFormData {
 export const defaultReportFormData: ReportFormData = {
   reportTitle: 'RP REPORT',
   brandName: '',
-  newsStatus: 'monitoring',
-  newsDescription: '',
-  socialMediaStatus: 'neutral',
-  socialMediaDescription: '',
+  newsBulletPoints: [],
+  socialMediaAccountStatusBefore: '',
+  socialMediaAccountStatusAfter: '',
+  socialMediaAccountStatusNote: '',
+  socialMediaCounterTotalViews: '',
+  socialMediaCounterTotalEngagement: '',
   serpCaptionBefore: 'Before: Hasil pencarian sebelum optimasi',
   serpCaptionAfter: 'After: Hasil pencarian setelah optimasi',
   socialMediaStats: [],

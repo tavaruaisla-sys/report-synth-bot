@@ -64,95 +64,117 @@ export const createCoverSlide = (doc: jsPDF, data: ReportData): void => {
   doc.text(`Update: ${data.updateDate}`, SLIDE_CONFIG.width / 2, SLIDE_CONFIG.height - 40, { align: 'center' });
 };
 
-// SLIDE 2: Executive Summary
+// SLIDE 2: Executive Summary (REPUTATION RECOVERY - CURRENT STATUS)
 export const createExecutiveSummarySlide = (doc: jsPDF, data: ReportData, pageNum: number, totalPages: number): void => {
   addNewSlide(doc);
-  drawHeader(doc, 'EXECUTIVE SUMMARY', pageNum, totalPages);
+  drawHeader(doc, 'REPUTATION RECOVERY - CURRENT STATUS', pageNum, totalPages);
   
   const startY = SLIDE_CONFIG.headerHeight + 15;
-  const colWidth = (SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 3) / 2;
-  
+  let currentY = startY;
+
   // News/Pemberitaan Section
-  doc.setFillColor('#f7fafc');
-  doc.rect(SLIDE_CONFIG.margin, startY, colWidth, 70, 'F');
-  
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.setTextColor(REPORT_COLORS.primary);
-  doc.text('NEWS / PEMBERITAAN', SLIDE_CONFIG.margin + 10, startY + 15);
-  
-  // Status badge
-  const statusColor = data.newsStatus === 'recovery' ? REPORT_COLORS.positive : 
-                      data.newsStatus === 'crisis' ? REPORT_COLORS.negative : REPORT_COLORS.neutral;
-  doc.setFillColor(statusColor);
-  doc.roundedRect(SLIDE_CONFIG.margin + 10, startY + 22, 60, 12, 3, 3, 'F');
-  doc.setFontSize(10);
-  doc.setTextColor('#ffffff');
-  doc.text(data.newsStatus.toUpperCase(), SLIDE_CONFIG.margin + 40, startY + 30, { align: 'center' });
-  
-  // Description
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(REPORT_COLORS.text);
-  const newsLines = doc.splitTextToSize(data.newsDescription || 'No description provided', colWidth - 20);
-  doc.text(newsLines, SLIDE_CONFIG.margin + 10, startY + 45);
-  
-  // Social Media Section
-  const socialX = SLIDE_CONFIG.margin * 2 + colWidth;
-  doc.setFillColor('#f7fafc');
-  doc.rect(socialX, startY, colWidth, 70, 'F');
-  
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.setTextColor(REPORT_COLORS.primary);
-  doc.text('SOCIAL MEDIA', socialX + 10, startY + 15);
-  
-  // Status badge
-  const socialStatusColor = data.socialMediaStatus === 'positive' ? REPORT_COLORS.positive : 
-                            data.socialMediaStatus === 'negative' ? REPORT_COLORS.negative : REPORT_COLORS.neutral;
-  doc.setFillColor(socialStatusColor);
-  doc.roundedRect(socialX + 10, startY + 22, 60, 12, 3, 3, 'F');
-  doc.setFontSize(10);
-  doc.setTextColor('#ffffff');
-  doc.text(data.socialMediaStatus.toUpperCase(), socialX + 40, startY + 30, { align: 'center' });
-  
-  // Description
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(REPORT_COLORS.text);
-  const socialLines = doc.splitTextToSize(data.socialMediaDescription || 'No description provided', colWidth - 20);
-  doc.text(socialLines, socialX + 10, startY + 45);
-  
-  // Sentiment Stats
-  const statsY = startY + 85;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.setTextColor(REPORT_COLORS.primary);
-  doc.text('SENTIMENT ANALYSIS OVERVIEW', SLIDE_CONFIG.margin, statsY);
+  doc.text('NEWS / PEMBERITAAN', SLIDE_CONFIG.margin, currentY);
+  currentY += 8;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(REPORT_COLORS.text);
   
-  // Stats cards
-  const cardWidth = (SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2 - 30) / 4;
-  const stats = [
-    { label: 'Total Results', value: data.sentimentStats.totalResults.toString(), color: REPORT_COLORS.accent },
-    { label: 'Negative', value: data.sentimentStats.negativeFound.toString(), color: REPORT_COLORS.negative },
-    { label: 'Positive', value: data.sentimentStats.positiveFound.toString(), color: REPORT_COLORS.positive },
-    { label: 'Sentiment Score', value: `${data.sentimentStats.sentimentScore}%`, color: REPORT_COLORS.primary },
-  ];
+  if (data.newsBulletPoints && data.newsBulletPoints.length > 0) {
+    data.newsBulletPoints.forEach((point) => {
+      // Draw bullet
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(0, 0, 0);
+      doc.circle(SLIDE_CONFIG.margin + 2, currentY - 1, 1, 'F');
+      
+      const lines = doc.splitTextToSize(point, SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2 - 10);
+      doc.text(lines, SLIDE_CONFIG.margin + 8, currentY);
+      currentY += (lines.length * 5) + 3;
+    });
+  } else {
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(REPORT_COLORS.textLight);
+    doc.text('Belum ada data berita.', SLIDE_CONFIG.margin + 8, currentY);
+    currentY += 10;
+  }
+
+  currentY += 10; // Spacing between sections
+
+  // Social Media Section
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(REPORT_COLORS.primary);
+  doc.text('SOSIAL MEDIA - TIKTOK', SLIDE_CONFIG.margin, currentY);
+  currentY += 10;
+
+  // Aktivitas Akun Lawan
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  doc.text('Aktivitas Akun Lawan', SLIDE_CONFIG.margin, currentY);
+  currentY += 8;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
   
-  stats.forEach((stat, i) => {
-    const x = SLIDE_CONFIG.margin + i * (cardWidth + 10);
-    doc.setFillColor(stat.color);
-    doc.roundedRect(x, statsY + 8, cardWidth, 45, 4, 4, 'F');
-    
-    doc.setFontSize(24);
-    doc.setTextColor('#ffffff');
-    doc.setFont('helvetica', 'bold');
-    doc.text(stat.value, x + cardWidth / 2, statsY + 28, { align: 'center' });
-    
+  // Bullet 1: Sebelum
+  doc.circle(SLIDE_CONFIG.margin + 2, currentY - 1, 1, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.text('Sebelum:', SLIDE_CONFIG.margin + 8, currentY);
+  const widthBefore = doc.getTextWidth('Sebelum:');
+  doc.setFont('helvetica', 'normal');
+  doc.text(` ${data.socialMediaAccountStatusBefore || '-'}`, SLIDE_CONFIG.margin + 8 + widthBefore, currentY);
+  currentY += 6;
+
+  // Bullet 2: Sesudah
+  doc.circle(SLIDE_CONFIG.margin + 2, currentY - 1, 1, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.text('Sesudah:', SLIDE_CONFIG.margin + 8, currentY);
+  const widthAfter = doc.getTextWidth('Sesudah:');
+  doc.setFont('helvetica', 'normal');
+  doc.text(` ${data.socialMediaAccountStatusAfter || '-'}`, SLIDE_CONFIG.margin + 8 + widthAfter, currentY);
+  currentY += 6;
+
+  // Note
+  if (data.socialMediaAccountStatusNote) {
+    doc.setFont('helvetica', 'italic');
     doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text(stat.label, x + cardWidth / 2, statsY + 42, { align: 'center' });
-  });
+    const noteLines = doc.splitTextToSize(data.socialMediaAccountStatusNote, SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2 - 20);
+    doc.text(noteLines, SLIDE_CONFIG.margin + 8, currentY);
+    currentY += (noteLines.length * 5) + 6;
+  } else {
+    currentY += 6;
+  }
+
+  // Aktivitas Counter Kita
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0); // Black
+  doc.text('Aktivitas Counter Kita', SLIDE_CONFIG.margin, currentY);
+  currentY += 8;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+
+  // Bullet 1
+  doc.circle(SLIDE_CONFIG.margin + 2, currentY - 1, 1, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.text('Total views konten counter:', SLIDE_CONFIG.margin + 8, currentY);
+  const widthViews = doc.getTextWidth('Total views konten counter:');
+  doc.setFont('helvetica', 'normal');
+  doc.text(` ${data.socialMediaCounterTotalViews || '-'}`, SLIDE_CONFIG.margin + 8 + widthViews, currentY);
+  currentY += 6;
+
+  // Bullet 2
+  doc.circle(SLIDE_CONFIG.margin + 2, currentY - 1, 1, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.text('Total engagement:', SLIDE_CONFIG.margin + 8, currentY);
+  const widthEng = doc.getTextWidth('Total engagement:');
+  doc.setFont('helvetica', 'normal');
+  doc.text(` ${data.socialMediaCounterTotalEngagement || '-'}`, SLIDE_CONFIG.margin + 8 + widthEng, currentY);
   
   drawFooter(doc, data.brandName);
 };

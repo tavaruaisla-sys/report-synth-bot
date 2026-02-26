@@ -194,43 +194,9 @@ const ReportDataForm = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>NEWS / PEMBERITAAN - Status</Label>
-                      <Select 
-                        value={formData.newsStatus} 
-                        onValueChange={(v) => onUpdateFormData({ newsStatus: v as 'recovery' | 'monitoring' | 'crisis' })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="recovery">Recovery</SelectItem>
-                          <SelectItem value="monitoring">Monitoring</SelectItem>
-                          <SelectItem value="crisis">Crisis</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>SOSIAL MEDIA - Status</Label>
-                      <Select 
-                        value={formData.socialMediaStatus} 
-                        onValueChange={(v) => onUpdateFormData({ socialMediaStatus: v as 'positive' | 'neutral' | 'negative' })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="positive">Positive</SelectItem>
-                          <SelectItem value="neutral">Neutral</SelectItem>
-                          <SelectItem value="negative">Negative</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label>NEWS / PEMBERITAAN - Deskripsi</Label>
+                      <Label>NEWS / PEMBERITAAN (Bullet Points)</Label>
                       <Button
                         onClick={handleGenerateWithScreenshots}
                         disabled={isGeneratingNewsDesc}
@@ -298,20 +264,69 @@ const ReportDataForm = ({
                     </div>
                     
                     <Textarea
-                      value={formData.newsDescription}
-                      onChange={(e) => onUpdateFormData({ newsDescription: e.target.value })}
-                      placeholder="Contoh: Terdapat pemberitaan negatif baru terkait isu... Pemberitaan masih bersifat tematik dan terbatas..."
-                      rows={4}
+                      value={formData.newsBulletPoints.join('\n')}
+                      onChange={(e) => onUpdateFormData({ newsBulletPoints: e.target.value.split('\n') })}
+                      placeholder="Masukkan poin-poin berita, satu per baris..."
+                      rows={6}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>SOSIAL MEDIA - Deskripsi (Aktivitas Akun Lawan & Counter)</Label>
-                    <Textarea
-                      value={formData.socialMediaDescription}
-                      onChange={(e) => onUpdateFormData({ socialMediaDescription: e.target.value })}
-                      placeholder="Contoh: Aktivitas Akun Lawan: 145 posting dengan total 3.124.896 views. Aktivitas Counter: Total views 2.077.049, engagement 96.523..."
-                      rows={3}
-                    />
+
+                  {/* Social Media Section */}
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <Label className="text-base font-semibold text-primary">SOSIAL MEDIA - TIKTOK</Label>
+                    
+                    <div className="space-y-3 pl-2 border-l-2 border-muted">
+                      <Label className="font-medium">Aktivitas Akun Lawan</Label>
+                      <div className="grid grid-cols-1 gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Sebelum</Label>
+                          <Input 
+                            value={formData.socialMediaAccountStatusBefore}
+                            onChange={(e) => onUpdateFormData({ socialMediaAccountStatusBefore: e.target.value })}
+                            placeholder="Contoh: 120 posting dengan total 2.746.077 views"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Sesudah</Label>
+                          <Input 
+                            value={formData.socialMediaAccountStatusAfter}
+                            onChange={(e) => onUpdateFormData({ socialMediaAccountStatusAfter: e.target.value })}
+                            placeholder="Contoh: 145 posting dengan total 3.124.896 views"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Catatan (Italic)</Label>
+                          <Textarea 
+                            value={formData.socialMediaAccountStatusNote}
+                            onChange={(e) => onUpdateFormData({ socialMediaAccountStatusNote: e.target.value })}
+                            placeholder="Contoh: Terdapat peningkatan volume konten..."
+                            rows={2}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 pl-2 border-l-2 border-muted">
+                      <Label className="font-medium">Aktivitas Counter Kita</Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Total Views</Label>
+                          <Input 
+                            value={formData.socialMediaCounterTotalViews}
+                            onChange={(e) => onUpdateFormData({ socialMediaCounterTotalViews: e.target.value })}
+                            placeholder="Contoh: 2.077.049"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Total Engagement</Label>
+                          <Input 
+                            value={formData.socialMediaCounterTotalEngagement}
+                            onChange={(e) => onUpdateFormData({ socialMediaCounterTotalEngagement: e.target.value })}
+                            placeholder="Contoh: 96.523 (like, comment...)"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
