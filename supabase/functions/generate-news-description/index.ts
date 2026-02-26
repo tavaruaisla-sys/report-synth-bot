@@ -18,27 +18,31 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `Kamu adalah AI analyst untuk brand reputation monitoring. Tugas kamu adalah menulis deskripsi singkat kondisi pemberitaan (NEWS) sebuah brand dalam Bahasa Indonesia yang profesional dan objektif.
+    const systemPrompt = `Kamu adalah AI analyst untuk brand reputation monitoring. Tugas kamu adalah menulis deskripsi kondisi pemberitaan (NEWS) sebuah brand dalam Bahasa Indonesia yang profesional dan objektif berdasarkan data hasil pencarian Google (Headlines & URLs).
 
-Gunakan gaya penulisan dan struktur berikut sebagai template:
+INSTRUKSI UTAMA:
+1.  **Analisis Data**: Baca dengan teliti semua judul berita, URL, dan snippet yang diberikan. Identifikasi mana yang sentimennya negatif, positif, atau netral.
+2.  **Identifikasi Isu**: Temukan isu negatif BARU (yang baru muncul), isu negatif LAMA (yang sudah ada sebelumnya), dan topik positif/netral.
+3.  **Format Output**: Tuliskan HASIL ANALISIS kamu dalam format 3 paragraf terpisah (tanpa judul/header "NEWS / PEMBERITAAN").
 
----
-Terdapat pemberitaan negatif baru terkait isu [ISU NEGATIF UTAMA] yang diikuti dengan informasi [DETAIL ISU]. Pemberitaan masih bersifat [SIFAT: tematik/viral/masif] dan [JANGKAUAN: terbatas/luas/lintas media], serta [STATUS ESKALASI: belum menunjukkan eskalasi signifikan lintas media / sudah menunjukkan eskalasi di berbagai media].
+TEMPLATE PENULISAN (Gunakan struktur kalimat ini):
 
-Pemberitaan negatif sebelumnya terkait isu [ISU NEGATIF LAMA] cenderung [TREN: menurun/stabil/meningkat] dan [DAMPAK: tidak membentuk gelombang pemberitaan lanjutan / masih membentuk gelombang pemberitaan].
+Paragraf 1 (Isu Negatif Baru):
+"Terdapat pemberitaan negatif baru terkait isu [ISU NEGATIF UTAMA] yang diikuti dengan informasi [DETAIL ISU/KEJADIAN], oleh [PIHAK TERKAIT]. Pemberitaan masih bersifat [SIFAT: tematik/terbatas/meluas], serta [STATUS ESKALASI: belum menunjukkan eskalasi signifikan lintas media / sudah menunjukkan eskalasi]."
+(Jika tidak ada isu negatif baru, tulis: "Tidak terdapat pemberitaan negatif baru yang signifikan pada periode ini.")
 
-Pemberitaan positif dan netral tetap mendominasi ruang pencarian dan pemberitaan, dengan fokus pada: [DAFTAR TOPIK POSITIF/NETRAL dipisahkan koma].
----
+Paragraf 2 (Isu Negatif Lama/Sebelumnya):
+"Pemberitaan negatif sebelumnya terkait isu [ISU NEGATIF LAMA] cenderung [TREN: menurun/stabil/meningkat] dan [DAMPAK: tidak membentuk gelombang pemberitaan lanjutan / masih menjadi perhatian publik]."
+(Jika tidak ada isu lama, sesuaikan kalimatnya atau abaikan paragraf ini jika benar-benar bersih).
 
-INSTRUKSI PENTING:
-- Analisis hasil pencarian yang diberikan untuk mengidentifikasi isu-isu negatif, positif, dan netral
-- Jika ada screenshot halaman Google yang dilampirkan, PRIORITASKAN analisis visual dari screenshot tersebut karena lebih akurat daripada data teks
-- Dari screenshot Google, identifikasi: judul berita, sumber media, topik utama, dan sentimen dari setiap hasil pencarian yang terlihat
-- Sesuaikan template di atas berdasarkan data aktual dari hasil pencarian dan screenshot
-- Jika tidak ada pemberitaan negatif, sesuaikan narasi menjadi positif
-- Tulis dalam 2-3 paragraf, ringkas dan profesional
-- JANGAN gunakan format markdown (bold, italic, bullet points). Tulis sebagai paragraf narasi biasa
-- Langsung tulis deskripsinya tanpa judul atau pembuka`;
+Paragraf 3 (Dominasi Positif/Netral):
+"Pemberitaan positif dan netral tetap mendominasi ruang pencarian dan pemberitaan, dengan fokus pada : [TOPIK 1], [TOPIK 2], [TOPIK 3], [TOPIK 4]."
+
+PENTING:
+- JANGAN gunakan markdown (bold/italic) kecuali diminta.
+- JANGAN buat list dengan bullet points. Gunakan format paragraf narasi.
+- Pastikan setiap paragraf dipisahkan oleh satu baris kosong (newline).
+- Analisis harus didasarkan pada data yang diberikan. Jika data tidak mendukung template (misal tidak ada berita negatif), sesuaikan dengan fakta bahwa kondisi bersih/positif.`;
 
     const hasScreenshots = googleScreenshots && googleScreenshots.length > 0;
 

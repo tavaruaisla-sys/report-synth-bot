@@ -264,9 +264,10 @@ export function useReportGenerator({
     setIsGeneratingNewsDesc(true);
 
     try {
-      const resultsContext = searchResults.slice(0, 10).map(r => 
-        `- ${r.title}: ${r.description} (${r.sentiment})`
-      ).join('\n');
+      // Use all search results (up to 100) for comprehensive analysis
+      const resultsContext = searchResults.map(r => 
+        `- ${r.title} (${r.url})\n  Snippet: ${r.description}\n  Sentiment: ${r.sentiment}`
+      ).join('\n\n');
 
       const { data, error } = await supabase.functions.invoke('generate-news-description', {
         body: {
