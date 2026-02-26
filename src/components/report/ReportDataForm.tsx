@@ -68,6 +68,14 @@ const ReportDataForm = ({
     shares: 0,
   });
   
+  const [newKeywordStat, setNewKeywordStat] = useState<Partial<KeywordStat>>({
+    keyword: '',
+    searchBefore: 0,
+    newsBefore: 0,
+    searchCurrent: 0,
+    newsCurrent: 0,
+  });
+  
   const [newCounter, setNewCounter] = useState<Partial<CounterContentItem>>({
     title: '',
     url: '',
