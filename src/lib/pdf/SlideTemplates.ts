@@ -316,108 +316,162 @@ export const createAfterSlide = (
   }
 };
 
-// SLIDE 6: AI Summary
-export const createAISummarySlide = (doc: jsPDF, data: ReportData, pageNum: number, totalPages: number): void => {
+// SLIDE 8: Appendix Divider
+export const createAppendixSlide = (doc: jsPDF, pageNum: number, totalPages: number): void => {
   addNewSlide(doc);
-  drawHeader(doc, 'AI ANALYSIS SUMMARY', pageNum, totalPages);
   
-  const startY = SLIDE_CONFIG.headerHeight + 15;
+  // Background: Dark Navy (same as Cover)
+  doc.setFillColor('#0f172a');
+  doc.rect(0, 0, SLIDE_CONFIG.width, SLIDE_CONFIG.height, 'F');
   
-  if (data.aiSummary) {
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    doc.setTextColor(REPORT_COLORS.text);
-    
-    const maxWidth = SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2;
-    const lines = doc.splitTextToSize(data.aiSummary, maxWidth);
-    doc.text(lines, SLIDE_CONFIG.margin, startY);
-    
-    // Sources
-    if (data.aiSummarySources && data.aiSummarySources.length > 0) {
-      const sourcesY = SLIDE_CONFIG.height - SLIDE_CONFIG.footerHeight - 40;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor(REPORT_COLORS.primary);
-      doc.text('Sources:', SLIDE_CONFIG.margin, sourcesY);
-      
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(REPORT_COLORS.accent);
-      data.aiSummarySources.slice(0, 5).forEach((source, i) => {
-        const truncatedSource = source.length > 80 ? source.substring(0, 77) + '...' : source;
-        doc.text(`${i + 1}. ${truncatedSource}`, SLIDE_CONFIG.margin, sourcesY + 10 + i * 6);
-      });
-    }
-  } else {
-    doc.setFont('helvetica', 'italic');
-    doc.setFontSize(12);
-    doc.setTextColor(REPORT_COLORS.textLight);
-    doc.text('AI summary not generated', SLIDE_CONFIG.width / 2, SLIDE_CONFIG.height / 2, { align: 'center' });
-  }
-  
-  drawFooter(doc, data.brandName);
+  // Text: "APPENDIX"
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(42);
+  doc.setTextColor('#ffffff');
+  doc.text('APPENDIX', SLIDE_CONFIG.width / 2, SLIDE_CONFIG.height / 2, { align: 'center' });
 };
 
-// SLIDE 7: Data Summary Table
+// SLIDE 9: Data Summary Table
 export const createDataSummarySlide = (doc: jsPDF, data: ReportData, pageNum: number, totalPages: number): void => {
   addNewSlide(doc);
   drawHeader(doc, 'DATA SUMMARY', pageNum, totalPages);
   
   const startY = SLIDE_CONFIG.headerHeight + 15;
   
-  // Keywords analysis table
+  // 1. Keyword Analysis Table (Blue Theme)
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.setTextColor(REPORT_COLORS.primary);
   doc.text('Keyword Analysis', SLIDE_CONFIG.margin, startY);
   
-  // Simple table for keywords
-  let tableY = startY + 10;
-  doc.setFillColor(REPORT_COLORS.primary);
+  let tableY = startY + 5;
+  
+  // Header Background
+  doc.setFillColor(REPORT_COLORS.primary); // Navy Blue
   doc.rect(SLIDE_CONFIG.margin, tableY, SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2, 10, 'F');
   
+  // Header Text
   doc.setFontSize(10);
   doc.setTextColor('#ffffff');
-  doc.text('Keyword', SLIDE_CONFIG.margin + 5, tableY + 7);
-  doc.text('Type', SLIDE_CONFIG.margin + 100, tableY + 7);
-  doc.text('Results Found', SLIDE_CONFIG.margin + 160, tableY + 7);
+  const colWidths = [80, 45, 45, 45, 45]; // Total approx 260
+  let currentX = SLIDE_CONFIG.margin + 5;
+  
+  doc.text('Keyword', currentX, tableY + 7);
+  currentX += colWidths[0];
+  doc.text('Search (Before)', currentX, tableY + 7);
+  currentX += colWidths[1];
+  doc.text('News (Before)', currentX, tableY + 7);
+  currentX += colWidths[2];
+  doc.text('Search (Current)', currentX, tableY + 7);
+  currentX += colWidths[3];
+  doc.text('News (Current)', currentX, tableY + 7);
   
   tableY += 10;
+  
+  // Rows
   doc.setTextColor(REPORT_COLORS.text);
   doc.setFont('helvetica', 'normal');
   
-  // Brand keywords
-  data.keywords.slice(0, 5).forEach((keyword, i) => {
-    const y = tableY + (i * 8) + 6;
-    if (i % 2 === 0) {
-      doc.setFillColor('#f7fafc');
-      doc.rect(SLIDE_CONFIG.margin, tableY + (i * 8), SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2, 8, 'F');
-    }
-    doc.setTextColor(REPORT_COLORS.text);
-    doc.text(keyword, SLIDE_CONFIG.margin + 5, y);
-    doc.setTextColor(REPORT_COLORS.positive);
-    doc.text('Brand', SLIDE_CONFIG.margin + 100, y);
-    doc.setTextColor(REPORT_COLORS.text);
-    doc.text('-', SLIDE_CONFIG.margin + 160, y);
-  });
+  if (data.keywordStats && data.keywordStats.length > 0) {
+    data.keywordStats.slice(0, 8).forEach((stat, i) => {
+      const rowY = tableY + (i * 8);
+      const textY = rowY + 6;
+      
+      // Striped background
+      if (i % 2 === 0) {
+        doc.setFillColor('#f0f4f8'); // Light blue tint
+        doc.rect(SLIDE_CONFIG.margin, rowY, SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2, 8, 'F');
+      }
+      
+      let rowX = SLIDE_CONFIG.margin + 5;
+      
+      // Keyword
+      doc.setTextColor(REPORT_COLORS.text);
+      doc.text(stat.keyword || '-', rowX, textY);
+      rowX += colWidths[0];
+      
+      // Search Before (Negative Red)
+      doc.setTextColor(REPORT_COLORS.negative);
+      doc.text((stat.searchBefore || 0).toString(), rowX + 10, textY);
+      rowX += colWidths[1];
+      
+      // News Before (Negative Red)
+      doc.text((stat.newsBefore || 0).toString(), rowX + 10, textY);
+      rowX += colWidths[2];
+      
+      // Search Current (Positive Green if 0, else Red)
+      doc.setTextColor(stat.searchCurrent === 0 ? REPORT_COLORS.positive : REPORT_COLORS.negative);
+      doc.text((stat.searchCurrent || 0).toString(), rowX + 10, textY);
+      rowX += colWidths[3];
+      
+      // News Current (Positive Green if 0, else Red)
+      doc.setTextColor(stat.newsCurrent === 0 ? REPORT_COLORS.positive : REPORT_COLORS.negative);
+      doc.text((stat.newsCurrent || 0).toString(), rowX + 10, textY);
+    });
+    tableY += (data.keywordStats.length * 8) + 5;
+  } else {
+    // Empty state
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(REPORT_COLORS.textLight);
+    doc.text('No keyword data available', SLIDE_CONFIG.margin + 5, tableY + 6);
+    tableY += 15;
+  }
   
-  // Negative keywords
-  const negStartIdx = Math.min(data.keywords.length, 5);
-  data.negativeKeywords.slice(0, 5).forEach((keyword, i) => {
-    const idx = negStartIdx + i;
-    const y = tableY + (idx * 8) + 6;
-    if (idx % 2 === 0) {
-      doc.setFillColor('#f7fafc');
-      doc.rect(SLIDE_CONFIG.margin, tableY + (idx * 8), SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2, 8, 'F');
-    }
-    doc.setTextColor(REPORT_COLORS.text);
-    doc.text(keyword, SLIDE_CONFIG.margin + 5, y);
-    doc.setTextColor(REPORT_COLORS.negative);
-    doc.text('Negative', SLIDE_CONFIG.margin + 100, y);
-    doc.setTextColor(REPORT_COLORS.text);
-    doc.text('-', SLIDE_CONFIG.margin + 160, y);
-  });
+  // 2. Production Stats Table (Green Theme)
+  const productionY = tableY + 10;
   
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(REPORT_COLORS.positive); // Green title
+  doc.text('Konten yang diproduksi', SLIDE_CONFIG.margin, productionY);
+  
+  const prodTableY = productionY + 5;
+  
+  // Header Background
+  doc.setFillColor(REPORT_COLORS.positive); // Green
+  doc.rect(SLIDE_CONFIG.margin, prodTableY, SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2, 10, 'F');
+  
+  // Header Text
+  doc.setFontSize(10);
+  doc.setTextColor('#ffffff');
+  const prodColWidths = [50, 50, 50, 50, 50]; // Equal width
+  let prodX = SLIDE_CONFIG.margin + 10;
+  
+  doc.text('Views', prodX, prodTableY + 7);
+  prodX += prodColWidths[0];
+  doc.text('Like', prodX, prodTableY + 7);
+  prodX += prodColWidths[1];
+  doc.text('Comment', prodX, prodTableY + 7);
+  prodX += prodColWidths[2];
+  doc.text('Saved', prodX, prodTableY + 7);
+  prodX += prodColWidths[3];
+  doc.text('Share', prodX, prodTableY + 7);
+  
+  // Value Row
+  const valY = prodTableY + 10;
+  const textValY = valY + 8;
+  
+  // Background
+  doc.setFillColor('#f0fff4'); // Light green tint
+  doc.rect(SLIDE_CONFIG.margin, valY, SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2, 12, 'F');
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(REPORT_COLORS.text);
+  
+  let valX = SLIDE_CONFIG.margin + 10;
+  const stats = data.productionStats || { views: '0', likes: '0', comments: '0', saved: '0', shares: '0' };
+  
+  doc.text((stats.views || '0').toString(), valX, textValY);
+  valX += prodColWidths[0];
+  doc.text((stats.likes || '0').toString(), valX, textValY);
+  valX += prodColWidths[1];
+  doc.text((stats.comments || '0').toString(), valX, textValY);
+  valX += prodColWidths[2];
+  doc.text((stats.saved || '0').toString(), valX, textValY);
+  valX += prodColWidths[3];
+  doc.text((stats.shares || '0').toString(), valX, textValY);
+
   drawFooter(doc, data.brandName);
 };
 
@@ -498,7 +552,7 @@ export const createCounterContentSlide = (doc: jsPDF, content: CounterContentIte
   drawFooter(doc, brandName);
 };
 
-// SLIDE: Production Links
+// SLIDE: Production Links (Grid Layout)
 export const createProductionLinksSlide = (
   doc: jsPDF, 
   links: ProductionLink[], 
@@ -512,24 +566,71 @@ export const createProductionLinksSlide = (
   addNewSlide(doc);
   drawHeader(doc, title, pageNum, totalPages);
   
-  const startY = SLIDE_CONFIG.headerHeight + 15;
+  const startY = SLIDE_CONFIG.headerHeight + 10;
+  const contentWidth = SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2;
+  const cols = 4;
+  const rows = 10;
+  const colWidth = contentWidth / cols;
+  const rowHeight = 14; // Fixed row height
   
-  doc.setFont('helvetica', 'normal');
+  // Table Header
+  const headerY = startY;
+  doc.setFillColor('#14532d'); // Dark Green (Green-900)
+  doc.rect(SLIDE_CONFIG.margin, headerY, contentWidth, rowHeight, 'F');
+  
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
+  doc.setTextColor('#ffffff');
   
-  links.slice(0, 10).forEach((link, i) => {
-    const y = startY + i * 14;
-    
-    doc.setTextColor(REPORT_COLORS.text);
-    const truncatedTitle = link.title.length > 50 ? link.title.substring(0, 47) + '...' : link.title;
-    doc.text(`${i + 1}. ${truncatedTitle}`, SLIDE_CONFIG.margin, y + 5);
-    
-    doc.setFontSize(8);
-    doc.setTextColor(REPORT_COLORS.accent);
-    const truncatedUrl = link.url.length > 70 ? link.url.substring(0, 67) + '...' : link.url;
-    doc.text(truncatedUrl, SLIDE_CONFIG.margin + 10, y + 12);
-    doc.setFontSize(10);
-  });
+  // Draw header labels
+  for (let c = 0; c < cols; c++) {
+    const x = SLIDE_CONFIG.margin + c * colWidth;
+    doc.text('Link', x + colWidth / 2, headerY + 9, { align: 'center' });
+    // Vertical separator
+    if (c > 0) {
+        doc.setDrawColor(255, 255, 255);
+        doc.setLineWidth(0.5);
+        doc.line(x, headerY, x, headerY + rowHeight);
+    }
+  }
+  
+  // Draw Grid Content
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setLineWidth(0.1);
+  
+  let currentY = headerY + rowHeight;
+  
+  // Iterate through grid cells (fixed 40 cells per page)
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+        const index = r * cols + c;
+        const x = SLIDE_CONFIG.margin + c * colWidth;
+        const y = currentY;
+        
+        // Draw cell border (Black)
+        doc.setDrawColor(0, 0, 0);
+        doc.rect(x, y, colWidth, rowHeight);
+        
+        if (index < links.length) {
+            const link = links[index];
+            if (link && link.url) {
+              const text = link.url;
+              
+              // Link text styling (Blue + Underline)
+              doc.setTextColor('#0000EE');
+              
+              // Wrap text
+              const splitText = doc.splitTextToSize(text, colWidth - 4);
+              // Limit to 3 lines max to avoid overflow
+              const linesToDraw = splitText.slice(0, 3);
+              
+              doc.text(linesToDraw, x + 2, y + 4);
+            }
+        }
+    }
+    currentY += rowHeight;
+  }
   
   drawFooter(doc, brandName);
 };

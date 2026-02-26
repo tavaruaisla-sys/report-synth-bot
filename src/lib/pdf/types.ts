@@ -1,5 +1,21 @@
 // Report data types for PDF generation
 
+export interface KeywordStat {
+  keyword: string;
+  searchBefore: number;
+  newsBefore: number;
+  searchCurrent: number;
+  newsCurrent: number;
+}
+
+export interface ProductionStats {
+  views: string;
+  likes: string;
+  comments: string;
+  saved: string;
+  shares: string;
+}
+
 export interface ReportData {
   // Basic Info
   reportTitle: string;
@@ -9,6 +25,7 @@ export interface ReportData {
   // Analysis Data (from existing features)
   keywords: string[];
   negativeKeywords: string[];
+  keywordStats: KeywordStat[]; // New field for Slide 9
   searchResults: SearchResultItem[];
   sentimentStats: SentimentStats;
   
@@ -38,6 +55,7 @@ export interface ReportData {
   
   // Social Media Stats (manual input)
   socialMediaStats: SocialMediaStat[];
+  productionStats: ProductionStats; // New field for Slide 9
   
   // Counter Content (manual input)
   counterContent: CounterContentItem[];
@@ -114,6 +132,10 @@ export interface ReportFormData {
   // Social Media Stats
   socialMediaStats: SocialMediaStat[];
   
+  // Slide 9 Data
+  keywordStats?: KeywordStat[];
+  productionStats?: ProductionStats;
+
   // Counter Content
   counterContent: CounterContentItem[];
   
@@ -144,6 +166,8 @@ export const defaultReportFormData: ReportFormData = {
   serpCaptionAfter: 'After: Hasil pencarian setelah optimasi',
   serpCaptionAfter2: 'After: Lanjutan hasil pencarian setelah optimasi',
   socialMediaStats: [],
+  keywordStats: [],
+  productionStats: { views: '0', likes: '0', comments: '0', saved: '0', shares: '0' },
   counterContent: [],
   newsProduction: [],
   socialMediaProduction: [],

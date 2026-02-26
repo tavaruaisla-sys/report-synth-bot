@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ReportFormData, ReportData, SocialMediaStat, CounterContentItem, ProductionLink } from "@/lib/pdf/types";
+import { ReportFormData, ReportData, SocialMediaStat, CounterContentItem, ProductionLink, KeywordStat } from "@/lib/pdf/types";
 import ReportPreview from "./ReportPreview";
 
 interface ReportDataFormProps {
@@ -80,6 +80,7 @@ const ReportDataForm = ({
   });
   
   const [productionType, setProductionType] = useState<'news' | 'social'>('news');
+  const [bulkLinks, setBulkLinks] = useState('');
 
   // Google screenshot uploads for AI analysis
   const [googleScreenshots, setGoogleScreenshots] = useState<{ file: File; preview: string }[]>([]);
@@ -141,6 +142,20 @@ const ReportDataForm = ({
     }
   };
 
+  const handleAddKeywordStat = () => {
+    if (newKeywordStat.keyword) {
+      const updatedStats = [...(formData.keywordStats || []), newKeywordStat as KeywordStat];
+      onUpdateFormData({ keywordStats: updatedStats });
+      setNewKeywordStat({ keyword: '', searchBefore: 0, newsBefore: 0, searchCurrent: 0, newsCurrent: 0 });
+    }
+  };
+
+  const handleRemoveKeywordStat = (index: number) => {
+    const updatedStats = [...(formData.keywordStats || [])];
+    updatedStats.splice(index, 1);
+    onUpdateFormData({ keywordStats: updatedStats });
+  };
+
   const handleAddSocialStat = () => {
     if (newSocialStat.platform && newSocialStat.url) {
       onAddSocialMediaStat(newSocialStat as SocialMediaStat);
@@ -156,10 +171,32 @@ const ReportDataForm = ({
   };
 
   const handleAddProductionLink = () => {
-    if (newProductionLink.title && newProductionLink.url) {
-      onAddProductionLink(newProductionLink as ProductionLink, productionType);
+    // Handle single link add
+    if (newProductionLink.url) {
+      const linkToAdd = {
+        title: newProductionLink.title || newProductionLink.url,
+        url: newProductionLink.url,
+      };
+      onAddProductionLink(linkToAdd as ProductionLink, productionType);
       setNewProductionLink({ title: '', url: '' });
     }
+  };
+
+  const handleBulkAddProductionLinks = () => {
+    if (!bulkLinks.trim()) return;
+    
+    const lines = bulkLinks.split('\n').filter(line => line.trim().length > 0);
+    lines.forEach(line => {
+      // Basic URL validation/cleaning
+      const url = line.trim();
+      if (url) {
+        onAddProductionLink({
+          title: url, // Use URL as title by default
+          url: url,
+        } as ProductionLink, productionType);
+      }
+    });
+    setBulkLinks('');
   };
 
   return (
@@ -620,137 +657,181 @@ const ReportDataForm = ({
             <TabsContent value="data" className="space-y-4 mt-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <BarChart2 className="h-4 w-4" />
-                <span>Slide 9: Data Summary & Social Media Statistics</span>
+                <span>Slide 9: Data Summary (Tables)</span>
               </div>
               
+              {/* Keyword Analysis Table */}
               <Card>
                 <CardHeader className="py-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <BarChart2 className="h-4 w-4" />
-                    Konten yang Diproduksi (Views, Engagement)
+                    Keyword Analysis (Blue Table)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-xs text-muted-foreground">
-                    Masukkan statistik konten counter yang sudah diproduksi (TikTok, Instagram, YouTube, dll)
+                    Masukkan data perbandingan sentimen negatif (Search & News) untuk setiap keyword.
                   </p>
-                  <div className="grid grid-cols-6 gap-2">
-                    <Input
-                      placeholder="Platform"
-                      value={newSocialStat.platform}
-                      onChange={(e) => setNewSocialStat(prev => ({ ...prev, platform: e.target.value }))}
-                    />
-                    <Input
-                      placeholder="URL"
-                      value={newSocialStat.url}
-                      onChange={(e) => setNewSocialStat(prev => ({ ...prev, url: e.target.value }))}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Views"
-                      value={newSocialStat.views || ''}
-                      onChange={(e) => setNewSocialStat(prev => ({ ...prev, views: parseInt(e.target.value) || 0 }))}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Like"
-                      value={newSocialStat.likes || ''}
-                      onChange={(e) => setNewSocialStat(prev => ({ ...prev, likes: parseInt(e.target.value) || 0 }))}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Comment"
-                      value={newSocialStat.comments || ''}
-                      onChange={(e) => setNewSocialStat(prev => ({ ...prev, comments: parseInt(e.target.value) || 0 }))}
-                    />
-                    <Button onClick={handleAddSocialStat} size="icon">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
                   
-                  {formData.socialMediaStats.map((stat, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-                      <span className="font-medium text-sm">{stat.platform}</span>
-                      <span className="text-xs text-muted-foreground">
-                        Views: {stat.views.toLocaleString()} | Like: {stat.likes.toLocaleString()} | Comment: {stat.comments.toLocaleString()}
-                      </span>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="ml-auto h-8 w-8"
-                        onClick={() => onRemoveSocialMediaStat(index)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                  {/* Add New Row */}
+                  <div className="grid grid-cols-6 gap-2 items-end">
+                    <div className="col-span-2 space-y-1">
+                      <Label className="text-[10px]">Keyword</Label>
+                      <Input
+                        placeholder="Keyword"
+                        value={newKeywordStat.keyword}
+                        onChange={(e) => setNewKeywordStat(prev => ({ ...prev, keyword: e.target.value }))}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px]">Search (Before)</Label>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={newKeywordStat.searchBefore || ''}
+                        onChange={(e) => setNewKeywordStat(prev => ({ ...prev, searchBefore: parseInt(e.target.value) || 0 }))}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px]">News (Before)</Label>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={newKeywordStat.newsBefore || ''}
+                        onChange={(e) => setNewKeywordStat(prev => ({ ...prev, newsBefore: parseInt(e.target.value) || 0 }))}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px]">Search (Current)</Label>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={newKeywordStat.searchCurrent || ''}
+                        onChange={(e) => setNewKeywordStat(prev => ({ ...prev, searchCurrent: parseInt(e.target.value) || 0 }))}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="space-y-1 flex-1">
+                        <Label className="text-[10px]">News (Current)</Label>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={newKeywordStat.newsCurrent || ''}
+                          onChange={(e) => setNewKeywordStat(prev => ({ ...prev, newsCurrent: parseInt(e.target.value) || 0 }))}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                      <Button onClick={handleAddKeywordStat} size="icon" className="h-8 w-8 shrink-0">
+                        <Plus className="h-4 w-4" />
                       </Button>
                     </div>
-                  ))}
+                  </div>
                   
-                  {formData.socialMediaStats.length > 0 && (
-                    <div className="pt-2 border-t">
-                      <p className="text-xs font-medium text-muted-foreground">Total:</p>
-                      <div className="grid grid-cols-4 gap-2 mt-1 text-sm">
-                        <div>Views: <span className="font-bold">{formData.socialMediaStats.reduce((a, b) => a + b.views, 0).toLocaleString()}</span></div>
-                        <div>Like: <span className="font-bold">{formData.socialMediaStats.reduce((a, b) => a + b.likes, 0).toLocaleString()}</span></div>
-                        <div>Comment: <span className="font-bold">{formData.socialMediaStats.reduce((a, b) => a + b.comments, 0).toLocaleString()}</span></div>
-                        <div>Share: <span className="font-bold">{formData.socialMediaStats.reduce((a, b) => a + b.shares, 0).toLocaleString()}</span></div>
-                      </div>
+                  {/* Existing Rows */}
+                  <div className="border rounded-md divide-y">
+                    <div className="grid grid-cols-6 gap-2 p-2 bg-muted/50 text-[10px] font-medium text-muted-foreground">
+                      <div className="col-span-2">Keyword</div>
+                      <div>Search (Before)</div>
+                      <div>News (Before)</div>
+                      <div>Search (Current)</div>
+                      <div>News (Current)</div>
                     </div>
-                  )}
+                    {formData.keywordStats?.map((stat, index) => (
+                      <div key={index} className="grid grid-cols-6 gap-2 p-2 items-center text-xs">
+                        <div className="col-span-2 font-medium truncate">{stat.keyword}</div>
+                        <div>{stat.searchBefore}</div>
+                        <div>{stat.newsBefore}</div>
+                        <div>{stat.searchCurrent}</div>
+                        <div className="flex items-center justify-between">
+                          <span>{stat.newsCurrent}</span>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-6 w-6 text-destructive"
+                            onClick={() => handleRemoveKeywordStat(index)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {(!formData.keywordStats || formData.keywordStats.length === 0) && (
+                      <div className="p-4 text-center text-xs text-muted-foreground italic">
+                        Belum ada data keyword.
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
-            
-              {/* Counter Content */}
+              
+              {/* Production Stats Table */}
               <Card>
                 <CardHeader className="py-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Link className="h-4 w-4" />
-                    Counter Content (Artikel/Konten Positif)
+                    <Share2 className="h-4 w-4" />
+                    Konten yang Diproduksi (Green Table)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-4 gap-2">
-                    <Input
-                      placeholder="Title"
-                      value={newCounter.title}
-                      onChange={(e) => setNewCounter(prev => ({ ...prev, title: e.target.value }))}
-                    />
-                    <Input
-                      placeholder="URL"
-                      value={newCounter.url}
-                      onChange={(e) => setNewCounter(prev => ({ ...prev, url: e.target.value }))}
-                    />
-                    <Select 
-                      value={newCounter.type} 
-                      onValueChange={(v) => setNewCounter(prev => ({ ...prev, type: v as 'news' | 'social' | 'blog' }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="news">News</SelectItem>
-                        <SelectItem value="social">Social</SelectItem>
-                        <SelectItem value="blog">Blog</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button onClick={handleAddCounter} size="icon">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  {formData.counterContent.map((item, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-                      <span className="text-xs px-2 py-1 bg-accent text-accent-foreground rounded">{item.type}</span>
-                      <span className="font-medium truncate">{item.title}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="ml-auto h-8 w-8"
-                        onClick={() => onRemoveCounterContent(index)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Total statistik konten yang diproduksi (Views, Like, Comment, Saved, Share).
+                  </p>
+                  <div className="grid grid-cols-5 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Views</Label>
+                      <Input
+                        value={formData.productionStats?.views || ''}
+                        onChange={(e) => onUpdateFormData({ 
+                          productionStats: { ...formData.productionStats, views: e.target.value } 
+                        })}
+                        placeholder="2.077.049"
+                      />
                     </div>
-                  ))}
+                    <div className="space-y-1">
+                      <Label className="text-xs">Like</Label>
+                      <Input
+                        value={formData.productionStats?.likes || ''}
+                        onChange={(e) => onUpdateFormData({ 
+                          productionStats: { ...formData.productionStats, likes: e.target.value } 
+                        })}
+                        placeholder="71,085"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Comment</Label>
+                      <Input
+                        value={formData.productionStats?.comments || ''}
+                        onChange={(e) => onUpdateFormData({ 
+                          productionStats: { ...formData.productionStats, comments: e.target.value } 
+                        })}
+                        placeholder="735"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Saved</Label>
+                      <Input
+                        value={formData.productionStats?.saved || ''}
+                        onChange={(e) => onUpdateFormData({ 
+                          productionStats: { ...formData.productionStats, saved: e.target.value } 
+                        })}
+                        placeholder="4,735"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Share</Label>
+                      <Input
+                        value={formData.productionStats?.shares || ''}
+                        onChange={(e) => onUpdateFormData({ 
+                          productionStats: { ...formData.productionStats, shares: e.target.value } 
+                        })}
+                        placeholder="19,968"
+                      />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -771,71 +852,132 @@ const ReportDataForm = ({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-xs text-muted-foreground">
-                    Link artikel news dan postingan social media yang sudah dipublikasikan
+                    Link artikel news dan postingan social media yang sudah dipublikasikan. Masukkan link saja, judul akan otomatis diset sama dengan URL.
                   </p>
-                  <div className="grid grid-cols-4 gap-2">
-                    <Input
-                      placeholder="Title"
-                      value={newProductionLink.title}
-                      onChange={(e) => setNewProductionLink(prev => ({ ...prev, title: e.target.value }))}
-                    />
-                    <Input
-                      placeholder="URL"
-                      value={newProductionLink.url}
-                      onChange={(e) => setNewProductionLink(prev => ({ ...prev, url: e.target.value }))}
-                    />
+                  
+                  {/* Production Type Selection */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label className="text-xs shrink-0">Type:</Label>
                     <Select 
                       value={productionType} 
                       onValueChange={(v) => setProductionType(v as 'news' | 'social')}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-[180px] h-8 text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="news">News</SelectItem>
-                        <SelectItem value="social">Social Media</SelectItem>
+                        <SelectItem value="news">News Production</SelectItem>
+                        <SelectItem value="social">Social Media Production</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button onClick={handleAddProductionLink} size="icon">
-                      <Plus className="h-4 w-4" />
+                  </div>
+
+                  {/* Bulk Add Textarea */}
+                  <div className="space-y-2">
+                    <Label className="text-xs">Bulk Add Links (Paste multiple URLs, one per line)</Label>
+                    <Textarea
+                      placeholder="https://example.com/article1&#10;https://example.com/article2"
+                      value={bulkLinks}
+                      onChange={(e) => setBulkLinks(e.target.value)}
+                      className="min-h-[100px] text-xs font-mono"
+                    />
+                    <Button 
+                      onClick={handleBulkAddProductionLinks} 
+                      disabled={!bulkLinks.trim()}
+                      size="sm"
+                      className="w-full text-xs"
+                    >
+                      <Plus className="mr-2 h-3 w-3" />
+                      Add All Links
                     </Button>
                   </div>
                   
+                  <div className="border-t border-border my-4 pt-4">
+                    <Label className="text-xs mb-2 block">Single Link Add (Optional Title)</Label>
+                    <div className="grid grid-cols-12 gap-2">
+                      <div className="col-span-5">
+                        <Input
+                          placeholder="URL"
+                          value={newProductionLink.url}
+                          onChange={(e) => setNewProductionLink(prev => ({ ...prev, url: e.target.value }))}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                      <div className="col-span-5">
+                        <Input
+                          placeholder="Title (Optional)"
+                          value={newProductionLink.title}
+                          onChange={(e) => setNewProductionLink(prev => ({ ...prev, title: e.target.value }))}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Button onClick={handleAddProductionLink} size="sm" className="w-full h-8">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
                   {formData.newsProduction.length > 0 && (
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-2">News Production:</p>
-                      {formData.newsProduction.map((item, index) => (
-                        <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg mb-1">
-                          <span className="font-medium truncate">{item.title}</span>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="ml-auto h-8 w-8"
-                            onClick={() => onRemoveProductionLink(index, 'news')}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      ))}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-semibold text-muted-foreground">News Production Links ({formData.newsProduction.length})</p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 text-xs text-destructive hover:text-destructive"
+                          onClick={() => onUpdateFormData({ newsProduction: [] })}
+                        >
+                          Clear All
+                        </Button>
+                      </div>
+                      <div className="max-h-[200px] overflow-y-auto space-y-1 pr-1 border rounded-md p-2">
+                        {formData.newsProduction.map((item, index) => (
+                          <div key={index} className="flex items-center gap-2 p-1.5 bg-muted/50 rounded text-xs group">
+                            <span className="truncate flex-1 font-mono text-[10px]">{item.url}</span>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => onRemoveProductionLink(index, 'news')}
+                            >
+                              <Trash2 className="h-3 w-3 text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                   
                   {formData.socialMediaProduction.length > 0 && (
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-2">Social Media Production:</p>
-                      {formData.socialMediaProduction.map((item, index) => (
-                        <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg mb-1">
-                          <span className="font-medium truncate">{item.title}</span>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="ml-auto h-8 w-8"
-                            onClick={() => onRemoveProductionLink(index, 'social')}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      ))}
+                    <div className="space-y-2 pt-2 border-t border-dashed">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-semibold text-muted-foreground">Social Media Links ({formData.socialMediaProduction.length})</p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 text-xs text-destructive hover:text-destructive"
+                          onClick={() => onUpdateFormData({ socialMediaProduction: [] })}
+                        >
+                          Clear All
+                        </Button>
+                      </div>
+                      <div className="max-h-[200px] overflow-y-auto space-y-1 pr-1 border rounded-md p-2">
+                        {formData.socialMediaProduction.map((item, index) => (
+                          <div key={index} className="flex items-center gap-2 p-1.5 bg-muted/50 rounded text-xs group">
+                            <span className="truncate flex-1 font-mono text-[10px]">{item.url}</span>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => onRemoveProductionLink(index, 'social')}
+                            >
+                              <Trash2 className="h-3 w-3 text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </CardContent>

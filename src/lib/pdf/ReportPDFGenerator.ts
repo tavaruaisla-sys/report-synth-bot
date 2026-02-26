@@ -9,6 +9,7 @@ import {
   createSectionDivider,
   createScreenshotSlide,
   createAfterSlide,
+  createAppendixSlide,
   createDataSummarySlide,
   createSocialMediaStatsSlide,
   createCounterContentSlide,
@@ -37,14 +38,21 @@ export class ReportPDFGenerator {
     pages += 1; // Executive Summary
     pages += 1; // Results divider
     pages += 2; // Before/After screenshots
-    pages += 1; // AI Summary
+    pages += 2; // Before 2/After 2 screenshots
     pages += 1; // Appendix divider
     pages += 1; // Data Summary
     
     if (this.data.socialMediaStats.length > 0) pages += 1;
     if (this.data.counterContent.length > 0) pages += 1;
-    if (this.data.newsProduction.length > 0) pages += 1;
-    if (this.data.socialMediaProduction.length > 0) pages += 1;
+    
+    // Calculate pages for production links (grid layout 4x10 = 40 items per page)
+    const linksPerPage = 40;
+    if (this.data.newsProduction.length > 0) {
+      pages += Math.ceil(this.data.newsProduction.length / linksPerPage);
+    }
+    if (this.data.socialMediaProduction.length > 0) {
+      pages += Math.ceil(this.data.socialMediaProduction.length / linksPerPage);
+    }
     
     return pages;
   }
@@ -105,7 +113,11 @@ export class ReportPDFGenerator {
       this.totalPages
     );
     
-    // SLIDE 6: Data Summary
+    // SLIDE 8: Appendix Divider
+    currentPage++;
+    createAppendixSlide(this.doc, currentPage, this.totalPages);
+
+    // SLIDE 9: Data Summary
     currentPage++;
     createDataSummarySlide(this.doc, this.data, currentPage, this.totalPages);
     
@@ -137,28 +149,36 @@ export class ReportPDFGenerator {
     
     // News Production Links
     if (this.data.newsProduction.length > 0) {
-      currentPage++;
-      createProductionLinksSlide(
-        this.doc, 
-        this.data.newsProduction, 
-        'NEWS PRODUCTION LINKS',
-        this.data.brandName,
-        currentPage, 
-        this.totalPages
-      );
+      const itemsPerPage = 40;
+      for (let i = 0; i < this.data.newsProduction.length; i += itemsPerPage) {
+        currentPage++;
+        const chunk = this.data.newsProduction.slice(i, i + itemsPerPage);
+        createProductionLinksSlide(
+          this.doc, 
+          chunk, 
+          i === 0 ? 'NEWS PRODUCTION LINKS' : 'NEWS PRODUCTION LINKS (Cont.)',
+          this.data.brandName,
+          currentPage, 
+          this.totalPages
+        );
+      }
     }
     
     // Social Media Production Links
     if (this.data.socialMediaProduction.length > 0) {
-      currentPage++;
-      createProductionLinksSlide(
-        this.doc, 
-        this.data.socialMediaProduction, 
-        'SOCIAL MEDIA PRODUCTION LINKS',
-        this.data.brandName,
-        currentPage, 
-        this.totalPages
-      );
+      const itemsPerPage = 40;
+      for (let i = 0; i < this.data.socialMediaProduction.length; i += itemsPerPage) {
+        currentPage++;
+        const chunk = this.data.socialMediaProduction.slice(i, i + itemsPerPage);
+        createProductionLinksSlide(
+          this.doc, 
+          chunk, 
+          i === 0 ? 'SOCIAL MEDIA PRODUCTION LINKS' : 'SOCIAL MEDIA PRODUCTION LINKS (Cont.)',
+          this.data.brandName,
+          currentPage, 
+          this.totalPages
+        );
+      }
     }
     
     return this.doc.output('blob');

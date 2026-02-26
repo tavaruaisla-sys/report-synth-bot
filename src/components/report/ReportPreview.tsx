@@ -246,37 +246,87 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
         </div>
       </SlideWrapper>
 
-      {/* Slide 6: Data Summary */}
+      {/* Slide 8: Appendix Divider */}
       <SlideWrapper>
-        <SlideHeader title="DATA SUMMARY" pageNum={8} />
-        <div className="p-4">
-          <h4 className="text-xs font-semibold mb-2" style={{ color: REPORT_COLORS.primary }}>
-            Keyword Analysis
-          </h4>
-          <div className="border rounded-lg overflow-hidden">
-            <div 
-              className="grid grid-cols-3 text-xs font-medium text-white p-2"
-              style={{ backgroundColor: REPORT_COLORS.primary }}
-            >
-              <span>Keyword</span>
-              <span>Type</span>
-              <span>Results</span>
+        <div 
+          className="h-full flex flex-col items-center justify-center text-white"
+          style={{ backgroundColor: '#0f172a' }} // Dark navy background
+        >
+          <h2 className="text-4xl font-bold uppercase tracking-wide">APPENDIX</h2>
+        </div>
+      </SlideWrapper>
+
+      {/* Slide 9: Data Summary */}
+      <SlideWrapper>
+        <SlideHeader title="DATA SUMMARY" pageNum={9} />
+        <div className="p-4 flex flex-col h-full overflow-hidden">
+          
+          {/* 1. Keyword Analysis Table */}
+          <div className="mb-4 flex-1 min-h-0">
+            <h4 className="text-xs font-bold mb-2 uppercase" style={{ color: REPORT_COLORS.primary }}>
+              Keyword Analysis
+            </h4>
+            <div className="border rounded-t-lg overflow-hidden">
+              <div 
+                className="grid grid-cols-5 text-[10px] font-bold text-white p-2 gap-1"
+                style={{ backgroundColor: REPORT_COLORS.primary }}
+              >
+                <span className="col-span-1">Keyword</span>
+                <span className="text-center">Search (Before)</span>
+                <span className="text-center">News (Before)</span>
+                <span className="text-center">Search (Current)</span>
+                <span className="text-center">News (Current)</span>
+              </div>
             </div>
-            {data.keywords.slice(0, 3).map((keyword, i) => (
-              <div key={i} className={`grid grid-cols-3 text-xs p-2 ${i % 2 === 0 ? 'bg-muted/30' : ''}`}>
-                <span>{keyword}</span>
-                <span className="text-green-600">Brand</span>
-                <span>-</span>
-              </div>
-            ))}
-            {data.negativeKeywords.slice(0, 3).map((keyword, i) => (
-              <div key={i} className={`grid grid-cols-3 text-xs p-2 ${(data.keywords.slice(0, 3).length + i) % 2 === 0 ? 'bg-muted/30' : ''}`}>
-                <span>{keyword}</span>
-                <span className="text-red-600">Negative</span>
-                <span>-</span>
-              </div>
-            ))}
+            <div className="overflow-y-auto max-h-[120px] border-x border-b rounded-b-lg">
+              {data.keywordStats && data.keywordStats.length > 0 ? (
+                data.keywordStats.map((stat, i) => (
+                  <div key={i} className={`grid grid-cols-5 text-[10px] p-2 gap-1 border-b last:border-0 items-center ${i % 2 === 0 ? 'bg-muted/20' : 'bg-white'}`}>
+                    <span className="col-span-1 font-medium truncate">{stat.keyword}</span>
+                    <span className="text-center text-red-600">{stat.searchBefore}</span>
+                    <span className="text-center text-red-600">{stat.newsBefore}</span>
+                    <span className={`text-center ${stat.searchCurrent === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {stat.searchCurrent}
+                    </span>
+                    <span className={`text-center ${stat.newsCurrent === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {stat.newsCurrent}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-[10px] text-muted-foreground italic">
+                  No keyword data available
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* 2. Production Stats Table */}
+          <div className="mb-2 shrink-0">
+            <h4 className="text-xs font-bold mb-2 uppercase" style={{ color: REPORT_COLORS.positive }}>
+              Konten yang diproduksi
+            </h4>
+            <div className="border rounded-lg overflow-hidden">
+              <div 
+                className="grid grid-cols-5 text-[10px] font-bold text-white p-2 text-center"
+                style={{ backgroundColor: REPORT_COLORS.positive }}
+              >
+                <span>Views</span>
+                <span>Like</span>
+                <span>Comment</span>
+                <span>Saved</span>
+                <span>Share</span>
+              </div>
+              <div className="grid grid-cols-5 text-xs p-3 text-center bg-green-50 font-semibold">
+                <span>{data.productionStats?.views || '0'}</span>
+                <span>{data.productionStats?.likes || '0'}</span>
+                <span>{data.productionStats?.comments || '0'}</span>
+                <span>{data.productionStats?.saved || '0'}</span>
+                <span>{data.productionStats?.shares || '0'}</span>
+              </div>
+            </div>
+          </div>
+          
         </div>
       </SlideWrapper>
 
@@ -305,7 +355,7 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
       {/* Optional: Counter Content */}
       {data.counterContent.length > 0 && (
         <SlideWrapper>
-          <SlideHeader title="COUNTER NARRATIVE CONTENT" pageNum={10} />
+          <SlideHeader title="COUNTER NARRATIVE CONTENT" pageNum={11} />
           <div className="p-4 space-y-2">
             {data.counterContent.slice(0, 5).map((item, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -321,6 +371,58 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
                 <span className="text-xs truncate flex-1">{item.title}</span>
               </div>
             ))}
+          </div>
+        </SlideWrapper>
+      )}
+
+      {/* Production Links - News */}
+      {data.newsProduction.length > 0 && (
+        <SlideWrapper>
+          <SlideHeader title="NEWS PRODUCTION LINKS" pageNum={12} />
+          <div className="p-8 flex flex-col h-full overflow-hidden">
+             <div className="border border-black text-[8px] flex-1 overflow-y-auto">
+                {/* Header */}
+                <div className="grid grid-cols-4 bg-[#14532d] text-white font-bold text-center sticky top-0 z-10">
+                   <div className="p-2 border-r border-white/20">Link</div>
+                   <div className="p-2 border-r border-white/20">Link</div>
+                   <div className="p-2 border-r border-white/20">Link</div>
+                   <div className="p-2">Link</div>
+                </div>
+                {/* Content Grid */}
+                <div className="grid grid-cols-4">
+                   {data.newsProduction.map((link, i) => (
+                      <div key={i} className="p-2 border-b border-r border-black/10 break-all text-blue-700 underline hover:bg-muted/20">
+                         {link.url}
+                      </div>
+                   ))}
+                </div>
+             </div>
+          </div>
+        </SlideWrapper>
+      )}
+
+      {/* Production Links - Social Media */}
+      {data.socialMediaProduction.length > 0 && (
+        <SlideWrapper>
+          <SlideHeader title="SOCIAL MEDIA PRODUCTION LINKS" pageNum={13} />
+          <div className="p-8 flex flex-col h-full overflow-hidden">
+             <div className="border border-black text-[8px] flex-1 overflow-y-auto">
+                {/* Header */}
+                <div className="grid grid-cols-4 bg-[#14532d] text-white font-bold text-center sticky top-0 z-10">
+                   <div className="p-2 border-r border-white/20">Link</div>
+                   <div className="p-2 border-r border-white/20">Link</div>
+                   <div className="p-2 border-r border-white/20">Link</div>
+                   <div className="p-2">Link</div>
+                </div>
+                {/* Content Grid */}
+                <div className="grid grid-cols-4">
+                   {data.socialMediaProduction.map((link, i) => (
+                      <div key={i} className="p-2 border-b border-r border-black/10 break-all text-blue-700 underline hover:bg-muted/20">
+                         {link.url}
+                      </div>
+                   ))}
+                </div>
+             </div>
           </div>
         </SlideWrapper>
       )}
