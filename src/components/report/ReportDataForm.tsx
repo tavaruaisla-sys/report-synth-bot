@@ -156,11 +156,11 @@ const ReportDataForm = ({
               </TabsTrigger>
             </TabsList>
             
-            {/* Slide 1-2: Cover & Executive Summary */}
+            {/* Slide 1-2: Cover & REPUTATION RECOVERY - CURRENT STATUS */}
             <TabsContent value="basic" className="space-y-4 mt-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <FileText className="h-4 w-4" />
-                <span>Slide 1: Cover | Slide 2: Executive Summary</span>
+                <span>Slide 1: Cover | Slide 2: REPUTATION RECOVERY - CURRENT STATUS</span>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -185,12 +185,12 @@ const ReportDataForm = ({
                 </div>
               </div>
               
-              {/* Slide 2: Executive Summary */}
+              {/* Slide 2: REPUTATION RECOVERY - CURRENT STATUS */}
               <Card>
                 <CardHeader className="py-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Newspaper className="h-4 w-4" />
-                    Slide 2: Executive Summary
+                    Slide 2: REPUTATION RECOVERY - CURRENT STATUS
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
