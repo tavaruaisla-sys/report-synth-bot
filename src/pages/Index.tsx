@@ -41,13 +41,16 @@ const Index = () => {
     googleAll: true,
     googleNews: true,
   });
+  const [depth, setDepth] = useState(1);
+  const [timeFilter, setTimeFilter] = useState('m'); // Default last month
 
   const handleGenerateReport = async () => {
     await search({
       keywords,
       negativeKeywords,
       sources,
-      limit: 10,
+      limit: depth * 10,
+      timeFilter,
     });
 
     toast({
@@ -117,7 +120,14 @@ const Index = () => {
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">2</span>
                 <h2 className="text-lg font-semibold text-foreground">Pilih Sumber Pencarian</h2>
               </div>
-              <SearchSourceTabs sources={sources} onSourcesChange={setSources} />
+              <SearchSourceTabs 
+                sources={sources} 
+                onSourcesChange={setSources}
+                depth={depth}
+                onDepthChange={setDepth}
+                timeFilter={timeFilter}
+                onTimeFilterChange={setTimeFilter}
+              />
             </div>
 
             {/* Step 3: Google Screenshots */}

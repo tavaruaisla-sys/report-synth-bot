@@ -11,6 +11,7 @@ interface SearchRequest {
     googleNews: boolean;
   };
   limit?: number;
+  timeFilter?: string;
 }
 
 interface SearchResult {
@@ -37,7 +38,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { keywords, negativeKeywords, sources, limit = 10 }: SearchRequest = await req.json();
+    const { keywords, negativeKeywords, sources, limit = 10, timeFilter = 'm' }: SearchRequest = await req.json();
 
     if (!keywords || keywords.length === 0) {
       return new Response(
@@ -65,21 +66,28 @@ Deno.serve(async (req) => {
         const searchAllPromise = (async () => {
           console.log(`Searching Google All for: ${keyword}`);
           
+          const requestBody: any = {
+            query: keyword,
+            limit,
+            lang: 'id',
+            country: 'id',
+            scrapeOptions: {
+              formats: ['markdown'],
+            },
+          };
+          
+          // Apply time filter if it's not 'any'
+          if (timeFilter !== 'any') {
+            requestBody.tbs = `qdr:${timeFilter}`;
+          }
+          
           const response = await fetch('https://api.firecrawl.dev/v1/search', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${apiKey}`,
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              query: keyword,
-              limit,
-              lang: 'id',
-              country: 'id',
-              scrapeOptions: {
-                formats: ['markdown'],
-              },
-            }),
+            body: JSON.stringify(requestBody),
           });
 
           const data = await response.json();
@@ -110,23 +118,24 @@ Deno.serve(async (req) => {
         const searchNewsPromise = (async () => {
           console.log(`Searching Google News for: ${keyword}`);
           
-          // For news, we add "news" to the query and filter by recent time
+          const requestBody: any = {
+            query: `${keyword} berita OR news`,
+            limit,
+            lang: 'id',
+            country: 'id',
+            tbs: `qdr:${timeFilter === 'any' ? 'm' : timeFilter}`, // Default to month if 'any' for news
+            scrapeOptions: {
+              formats: ['markdown'],
+            },
+          };
+          
           const response = await fetch('https://api.firecrawl.dev/v1/search', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${apiKey}`,
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              query: `${keyword} berita OR news`,
-              limit,
-              lang: 'id',
-              country: 'id',
-              tbs: 'qdr:m', // Last month for news
-              scrapeOptions: {
-                formats: ['markdown'],
-              },
-            }),
+            body: JSON.stringify(requestBody),
           });
 
           const data = await response.json();

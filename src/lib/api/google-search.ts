@@ -38,6 +38,7 @@ export interface SearchOptions {
     googleNews: boolean;
   };
   limit?: number;
+  timeFilter?: string;
 }
 
 export const googleSearchApi = {
