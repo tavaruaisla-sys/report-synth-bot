@@ -155,7 +155,7 @@ const ReportDataForm = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+      <DialogContent className="max-w-[95vw] w-[1400px] max-h-[90vh] p-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-accent" />
@@ -166,28 +166,28 @@ const ReportDataForm = ({
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="max-h-[60vh]">
-          <Tabs defaultValue="basic" className="p-6 pt-4">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="basic" className="text-xs">
-                <span className="hidden sm:inline">Slide 1-2:</span> Cover
-              </TabsTrigger>
-              <TabsTrigger value="screenshots" className="text-xs">
-                <span className="hidden sm:inline">Slide 4-5:</span> SERP
-              </TabsTrigger>
-              <TabsTrigger value="ai" className="text-xs">
-                <span className="hidden sm:inline">Slide 6-7:</span> AI
-              </TabsTrigger>
-              <TabsTrigger value="data" className="text-xs">
-                <span className="hidden sm:inline">Slide 9:</span> Data
-              </TabsTrigger>
-              <TabsTrigger value="production" className="text-xs">
-                <span className="hidden sm:inline">Slide 10+:</span> Links
-              </TabsTrigger>
-              <TabsTrigger value="preview" className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-              </TabsTrigger>
-            </TabsList>
+        <div className="flex gap-0 border-t border-border" style={{ height: 'calc(90vh - 140px)' }}>
+          {/* Left Column - Form */}
+          <div className="flex-1 min-w-0 border-r border-border">
+            <ScrollArea className="h-full">
+              <Tabs defaultValue="basic" className="p-6 pt-4">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="basic" className="text-xs">
+                    <span className="hidden sm:inline">Slide 1-2:</span> Cover
+                  </TabsTrigger>
+                  <TabsTrigger value="screenshots" className="text-xs">
+                    <span className="hidden sm:inline">Slide 4-5:</span> SERP
+                  </TabsTrigger>
+                  <TabsTrigger value="ai" className="text-xs">
+                    <span className="hidden sm:inline">Slide 6-7:</span> AI
+                  </TabsTrigger>
+                  <TabsTrigger value="data" className="text-xs">
+                    <span className="hidden sm:inline">Slide 9:</span> Data
+                  </TabsTrigger>
+                  <TabsTrigger value="production" className="text-xs">
+                    <span className="hidden sm:inline">Slide 10+:</span> Links
+                  </TabsTrigger>
+                </TabsList>
             
             {/* Slide 1-2: Cover & Executive Summary */}
             <TabsContent value="basic" className="space-y-4 mt-4">
@@ -696,26 +696,26 @@ const ReportDataForm = ({
               </Card>
             </TabsContent>
             
-            {/* Preview Tab */}
-            <TabsContent value="preview" className="mt-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    Preview slide PDF yang akan di-generate
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Scroll untuk melihat semua slide
-                  </p>
-                </div>
-                <div className="border rounded-lg p-4 bg-muted/20">
-                  <ReportPreview data={previewData} />
-                </div>
+              </Tabs>
+            </ScrollArea>
+          </div>
+
+          {/* Right Column - Realtime Preview */}
+          <div className="w-[420px] flex-shrink-0 flex flex-col">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
+              <Eye className="h-4 w-4 text-accent" />
+              <h3 className="text-sm font-semibold text-foreground">Realtime Preview</h3>
+              <span className="text-[10px] text-muted-foreground ml-auto">Scroll untuk semua slide</span>
+            </div>
+            <ScrollArea className="flex-1">
+              <div className="p-4 space-y-3">
+                <ReportPreview data={previewData} />
               </div>
-            </TabsContent>
-          </Tabs>
-        </ScrollArea>
+            </ScrollArea>
+          </div>
+        </div>
         
-        <DialogFooter className="p-6 pt-0">
+        <DialogFooter className="p-6 pt-0 border-t border-border">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
