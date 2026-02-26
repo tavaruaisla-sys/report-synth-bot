@@ -85,6 +85,7 @@ const ReportDataForm = ({
   const [newProductionLink, setNewProductionLink] = useState<Partial<ProductionLink>>({
     title: '',
     url: '',
+    platform: '',
   });
   
   const [productionType, setProductionType] = useState<'news' | 'social'>('news');
@@ -117,10 +118,10 @@ const ReportDataForm = ({
     onGenerateNewsDescription(allImages.length > 0 ? allImages : undefined);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'serpScreenshotBefore' | 'serpScreenshotBefore2' | 'serpScreenshotAfter' | 'serpScreenshotAfter2') => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'serpScreenshotBefore' | 'serpScreenshotBefore2' | 'serpScreenshotAfter' | 'serpScreenshotAfter2' | 'lampiranImages') => {
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
-      const currentFiles = formData[field] || [];
+      const currentFiles = formData[field as keyof ReportFormData] || [];
       // Cast currentFiles to array to avoid type error if it's undefined
       const newFiles = [...(Array.isArray(currentFiles) ? currentFiles : []), ...files];
       
@@ -128,7 +129,8 @@ const ReportDataForm = ({
       
       const type = field === 'serpScreenshotBefore' ? 'before' : 
                    field === 'serpScreenshotBefore2' ? 'before2' :
-                   field === 'serpScreenshotAfter' ? 'after' : 'after2';
+                   field === 'serpScreenshotAfter' ? 'after' : 
+                   field === 'serpScreenshotAfter2' ? 'after2' : 'lampiran';
       files.forEach(file => {
         onUpdateScreenshotPreview(file, type);
       });
@@ -137,15 +139,16 @@ const ReportDataForm = ({
     if (e.target) e.target.value = '';
   };
 
-  const handleRemoveScreenshot = (index: number, field: 'serpScreenshotBefore' | 'serpScreenshotBefore2' | 'serpScreenshotAfter' | 'serpScreenshotAfter2') => {
-    const currentFiles = formData[field];
+  const handleRemoveScreenshot = (index: number, field: 'serpScreenshotBefore' | 'serpScreenshotBefore2' | 'serpScreenshotAfter' | 'serpScreenshotAfter2' | 'lampiranImages') => {
+    const currentFiles = formData[field as keyof ReportFormData];
     if (Array.isArray(currentFiles)) {
       const newFiles = currentFiles.filter((_, i) => i !== index);
       onUpdateFormData({ [field]: newFiles });
       
       const type = field === 'serpScreenshotBefore' ? 'before' : 
                    field === 'serpScreenshotBefore2' ? 'before2' :
-                   field === 'serpScreenshotAfter' ? 'after' : 'after2';
+                   field === 'serpScreenshotAfter' ? 'after' : 
+                   field === 'serpScreenshotAfter2' ? 'after2' : 'lampiran';
       onRemoveScreenshotPreview(index, type);
     }
   };
@@ -181,12 +184,27 @@ const ReportDataForm = ({
   const handleAddProductionLink = () => {
     // Handle single link add
     if (newProductionLink.url) {
+      let platform = newProductionLink.platform || '';
+      
+      // Auto-extract domain if platform is empty
+      if (!platform && newProductionLink.url) {
+        try {
+          const hostname = new URL(newProductionLink.url).hostname;
+          platform = hostname.replace('www.', '').split('.')[0];
+          // Capitalize first letter
+          platform = platform.charAt(0).toUpperCase() + platform.slice(1);
+        } catch (e) {
+          // Ignore invalid URLs
+        }
+      }
+
       const linkToAdd = {
         title: newProductionLink.title || newProductionLink.url,
         url: newProductionLink.url,
+        platform: platform,
       };
       onAddProductionLink(linkToAdd as ProductionLink, productionType);
-      setNewProductionLink({ title: '', url: '' });
+      setNewProductionLink({ title: '', url: '', platform: '' });
     }
   };
 
@@ -198,9 +216,19 @@ const ReportDataForm = ({
       // Basic URL validation/cleaning
       const url = line.trim();
       if (url) {
+        let platform = '';
+        try {
+          const hostname = new URL(url).hostname;
+          platform = hostname.replace('www.', '').split('.')[0];
+          platform = platform.charAt(0).toUpperCase() + platform.slice(1);
+        } catch (e) {
+          // Ignore invalid URLs
+        }
+
         onAddProductionLink({
           title: url, // Use URL as title by default
           url: url,
+          platform: platform,
         } as ProductionLink, productionType);
       }
     });
@@ -228,6 +256,9 @@ const ReportDataForm = ({
               </TabsTrigger>
               <TabsTrigger value="production" className="text-xs">
                 <span className="hidden sm:inline">Slide 10+:</span> Links
+              </TabsTrigger>
+              <TabsTrigger value="lampiran" className="text-xs">
+                <span className="hidden sm:inline">Last:</span> Lampiran
               </TabsTrigger>
             </TabsList>
             
@@ -903,7 +934,7 @@ const ReportDataForm = ({
                   <div className="border-t border-border my-4 pt-4">
                     <Label className="text-xs mb-2 block">Single Link Add (Optional Title)</Label>
                     <div className="grid grid-cols-12 gap-2">
-                      <div className="col-span-5">
+                      <div className="col-span-4">
                         <Input
                           placeholder="URL"
                           value={newProductionLink.url}
@@ -911,11 +942,19 @@ const ReportDataForm = ({
                           className="h-8 text-xs"
                         />
                       </div>
-                      <div className="col-span-5">
+                      <div className="col-span-3">
                         <Input
                           placeholder="Title (Optional)"
                           value={newProductionLink.title}
                           onChange={(e) => setNewProductionLink(prev => ({ ...prev, title: e.target.value }))}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <Input
+                          placeholder="Media/Platform (Auto)"
+                          value={newProductionLink.platform}
+                          onChange={(e) => setNewProductionLink(prev => ({ ...prev, platform: e.target.value }))}
                           className="h-8 text-xs"
                         />
                       </div>
@@ -986,6 +1025,67 @@ const ReportDataForm = ({
                           </div>
                         ))}
                       </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            {/* Last: Lampiran */}
+            <TabsContent value="lampiran" className="space-y-4 mt-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <Image className="h-4 w-4" />
+                <span>Lampiran Slides (Image Upload)</span>
+              </div>
+
+              <Card>
+                <CardHeader className="py-3">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <ImagePlus className="h-4 w-4" />
+                    Upload Lampiran Images
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-xs text-muted-foreground">
+                    Upload images for Lampiran slides. Each image will create a new slide.
+                  </p>
+                  
+                  <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => handleFileUpload(e, 'lampiranImages' as any)} // Cast to any because we handle it in wrapper
+                      className="hidden"
+                      id="lampiran-upload"
+                    />
+                    <label htmlFor="lampiran-upload" className="cursor-pointer block w-full h-full">
+                      <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground">
+                        Click to upload Lampiran images (Multiple allowed)
+                      </p>
+                    </label>
+                  </div>
+
+                  {/* Preview Grid */}
+                  {previewData.lampiranImages && previewData.lampiranImages.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {previewData.lampiranImages.map((src, index) => (
+                        <div key={index} className="relative group rounded-md overflow-hidden border border-border bg-muted">
+                          <img
+                            src={src}
+                            alt={`Lampiran ${index + 1}`}
+                            className="w-full h-20 object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveScreenshot(index, 'lampiranImages' as any)}
+                            className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </CardContent>

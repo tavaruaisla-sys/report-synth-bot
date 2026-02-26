@@ -14,6 +14,8 @@ import {
   createSocialMediaStatsSlide,
   createCounterContentSlide,
   createProductionLinksSlide,
+  createNewsProductionSlide,
+  createLampiranSlide,
 } from './SlideTemplates';
 
 export class ReportPDFGenerator {
@@ -47,11 +49,21 @@ export class ReportPDFGenerator {
     
     // Calculate pages for production links (grid layout 4x10 = 40 items per page)
     const linksPerPage = 40;
+    
+    // News Production (New Table Layout: ~12-14 items per page depending on wrapping)
+    const newsPerPage = 14; 
     if (this.data.newsProduction.length > 0) {
-      pages += Math.ceil(this.data.newsProduction.length / linksPerPage);
+      pages += Math.ceil(this.data.newsProduction.length / newsPerPage);
     }
+    
+    // Social Media Production (Grid Layout: 40 items per page)
     if (this.data.socialMediaProduction.length > 0) {
       pages += Math.ceil(this.data.socialMediaProduction.length / linksPerPage);
+    }
+    
+    // Lampiran Slides
+    if (this.data.lampiranImages.length > 0) {
+      pages += this.data.lampiranImages.length;
     }
     
     return pages;
@@ -149,14 +161,14 @@ export class ReportPDFGenerator {
     
     // News Production Links
     if (this.data.newsProduction.length > 0) {
-      const itemsPerPage = 40;
+      const itemsPerPage = 14; // Matches the table layout height
       for (let i = 0; i < this.data.newsProduction.length; i += itemsPerPage) {
         currentPage++;
         const chunk = this.data.newsProduction.slice(i, i + itemsPerPage);
-        createProductionLinksSlide(
+        createNewsProductionSlide(
           this.doc, 
           chunk, 
-          i === 0 ? 'NEWS PRODUCTION LINKS' : 'NEWS PRODUCTION LINKS (Cont.)',
+          i === 0 ? 'PRODUCTION RESULTS - NEWS' : 'PRODUCTION RESULTS - NEWS (Cont.)',
           this.data.brandName,
           currentPage, 
           this.totalPages
@@ -179,6 +191,14 @@ export class ReportPDFGenerator {
           this.totalPages
         );
       }
+    }
+    
+    // Lampiran Slides
+    if (this.data.lampiranImages.length > 0) {
+      this.data.lampiranImages.forEach((img) => {
+        currentPage++;
+        createLampiranSlide(this.doc, img, currentPage, this.totalPages);
+      });
     }
     
     return this.doc.output('blob');

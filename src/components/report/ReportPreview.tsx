@@ -382,21 +382,24 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
       {/* Production Links - News */}
       {data.newsProduction?.length > 0 && (
         <SlideWrapper>
-          <SlideHeader title="NEWS PRODUCTION LINKS" pageNum={12} />
+          <SlideHeader title="PRODUCTION RESULTS - NEWS" pageNum={12} />
           <div className="p-8 flex flex-col h-full overflow-hidden">
-             <div className="border border-black text-[8px] flex-1 overflow-y-auto">
+             <div className="border border-indigo-600 text-[8px] flex-1 overflow-y-auto">
                 {/* Header */}
-                <div className="grid grid-cols-4 bg-[#14532d] text-white font-bold text-center sticky top-0 z-10">
-                   <div className="p-2 border-r border-white/20">Link</div>
-                   <div className="p-2 border-r border-white/20">Link</div>
-                   <div className="p-2 border-r border-white/20">Link</div>
-                   <div className="p-2">Link</div>
+                <div className="flex bg-indigo-600 text-white font-bold sticky top-0 z-10">
+                   <div className="p-2 w-[70%] border-r border-white/20">Link</div>
+                   <div className="p-2 w-[30%]">Media</div>
                 </div>
-                {/* Content Grid */}
-                <div className="grid grid-cols-4">
+                {/* Content Rows */}
+                <div className="flex flex-col">
                    {data.newsProduction.map((link, i) => (
-                      <div key={i} className="p-2 border-b border-r border-black/10 break-all text-blue-700 underline hover:bg-muted/20">
-                         {link.url}
+                      <div key={i} className="flex border-b border-indigo-100 last:border-0 hover:bg-muted/20">
+                         <div className="p-2 w-[70%] border-r border-indigo-100 break-all text-blue-700 underline">
+                            {link.url}
+                         </div>
+                         <div className="p-2 w-[30%] text-black truncate font-medium">
+                            {link.platform || '-'}
+                         </div>
                       </div>
                    ))}
                 </div>
@@ -429,6 +432,30 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
              </div>
           </div>
         </SlideWrapper>
+      )}
+      {/* Last: Lampiran */}
+      {data.lampiranImages?.length > 0 && (
+        <>
+          {data.lampiranImages.map((src, i) => (
+            <SlideWrapper key={`lampiran-${i}`}>
+              <div className="flex flex-col h-full bg-white p-8">
+                {/* Title */}
+                <h2 className="text-3xl font-bold text-[#0f172a] uppercase mb-6 text-left">
+                  LAMPIRAN
+                </h2>
+                
+                {/* Content */}
+                <div className="flex-1 min-h-0 bg-white border border-gray-200 shadow-sm rounded-sm overflow-hidden relative">
+                   <img 
+                     src={src} 
+                     alt={`Lampiran ${i+1}`} 
+                     className="w-full h-full object-contain"
+                   />
+                </div>
+              </div>
+            </SlideWrapper>
+          ))}
+        </>
       )}
     </div>
   );

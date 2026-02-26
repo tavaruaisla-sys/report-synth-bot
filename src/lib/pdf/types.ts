@@ -63,6 +63,9 @@ export interface ReportData {
   // Production Links (News & Social Media)
   newsProduction: ProductionLink[];
   socialMediaProduction: ProductionLink[];
+  
+  // Lampiran Slides
+  lampiranImages: string[];
 }
 
 export interface SearchResultItem {
@@ -143,6 +146,9 @@ export interface ReportFormData {
   newsProduction: ProductionLink[];
   socialMediaProduction: ProductionLink[];
   
+  // Lampiran Slides
+  lampiranImages: (File | string)[];
+  
   // AI Summary toggle
   generateAiSummary: boolean;
 }
@@ -171,6 +177,7 @@ export const defaultReportFormData: ReportFormData = {
   counterContent: [],
   newsProduction: [],
   socialMediaProduction: [],
+  lampiranImages: [],
   generateAiSummary: true,
 };
 

@@ -35,7 +35,8 @@ export function useReportGenerator({
     before2: string[];
     after: string[];
     after2: string[];
-  }>({ before: [], before2: [], after: [], after2: [] });
+    lampiran: string[];
+  }>({ before: [], before2: [], after: [], after2: [], lampiran: [] });
 
   // Build preview data for the preview component
   const previewData: ReportData = useMemo(() => ({
@@ -86,6 +87,7 @@ export function useReportGenerator({
     counterContent: formData.counterContent || [],
     newsProduction: formData.newsProduction || [],
     socialMediaProduction: formData.socialMediaProduction || [],
+    lampiranImages: screenshotPreviews.lampiran,
   }), [formData, keywords, negativeKeywords, searchResults, searchStats, aiSummary, screenshotPreviews]);
 
   const saveReport = async () => {
@@ -149,6 +151,18 @@ export function useReportGenerator({
         }
     }
 
+    let lampiranUrls: string[] = [];
+    if (Array.isArray(formData.lampiranImages)) {
+        for (const item of formData.lampiranImages) {
+            if (item instanceof File) {
+                const url = await reportService.uploadImage(item);
+                if (url) lampiranUrls.push(url);
+            } else {
+                lampiranUrls.push(item as string);
+            }
+        }
+    }
+
       // Prepare data to save
       const reportDataToSave: ReportData = {
         ...previewData,
@@ -156,6 +170,7 @@ export function useReportGenerator({
         serpScreenshotBefore2: screenshotBefore2Urls,
         serpScreenshotAfter: screenshotAfterUrls,
         serpScreenshotAfter2: screenshotAfter2Urls,
+        lampiranImages: lampiranUrls,
       };
 
       let savedReport: DBReport | null = null;
@@ -176,12 +191,14 @@ export function useReportGenerator({
             serpScreenshotBefore2: screenshotBefore2Urls,
             serpScreenshotAfter: screenshotAfterUrls,
             serpScreenshotAfter2: screenshotAfter2Urls,
+            lampiranImages: lampiranUrls,
         }));
         setScreenshotPreviews({
             before: screenshotBeforeUrls,
             before2: screenshotBefore2Urls,
             after: screenshotAfterUrls,
             after2: screenshotAfter2Urls,
+            lampiran: lampiranUrls,
         });
 
         toast({
@@ -240,6 +257,9 @@ export function useReportGenerator({
       counterContent: data.counterContent || [],
       newsProduction: data.newsProduction || [],
       socialMediaProduction: data.socialMediaProduction || [],
+      lampiranImages: Array.isArray(data.lampiranImages) 
+        ? data.lampiranImages 
+        : data.lampiranImages ? [data.lampiranImages] : [],
       generateAiSummary: !!data.aiSummary,
     });
     
@@ -258,6 +278,9 @@ export function useReportGenerator({
       after2: Array.isArray(data.serpScreenshotAfter2)
         ? data.serpScreenshotAfter2
         : data.serpScreenshotAfter2 ? [data.serpScreenshotAfter2] : [],
+      lampiran: Array.isArray(data.lampiranImages)
+        ? data.lampiranImages
+        : data.lampiranImages ? [data.lampiranImages] : [],
     });
     
     toast({
@@ -267,7 +290,7 @@ export function useReportGenerator({
   };
 
   // Handle screenshot preview updates
-  const updateScreenshotPreview = async (file: File, type: 'before' | 'before2' | 'after' | 'after2') => {
+  const updateScreenshotPreview = async (file: File, type: 'before' | 'before2' | 'after' | 'after2' | 'lampiran') => {
     const base64 = await fileToBase64(file);
     setScreenshotPreviews(prev => ({
       ...prev,
@@ -275,7 +298,7 @@ export function useReportGenerator({
     }));
   };
 
-  const removeScreenshotPreview = (index: number, type: 'before' | 'before2' | 'after' | 'after2') => {
+  const removeScreenshotPreview = (index: number, type: 'before' | 'before2' | 'after' | 'after2' | 'lampiran') => {
     setScreenshotPreviews(prev => ({
       ...prev,
       [type]: prev[type].filter((_, i) => i !== index),

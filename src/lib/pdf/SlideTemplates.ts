@@ -552,8 +552,141 @@ export const createCounterContentSlide = (doc: jsPDF, content: CounterContentIte
   drawFooter(doc, brandName);
 };
 
-// SLIDE: Production Links (Grid Layout)
-export const createProductionLinksSlide = (
+// SLIDE: News Production Table (2-Column)
+export const createNewsProductionSlide = (
+  doc: jsPDF,
+  links: ProductionLink[],
+  title: string,
+  brandName: string,
+  pageNum: number,
+  totalPages: number
+): void => {
+  if (links.length === 0) return;
+
+  addNewSlide(doc);
+  drawHeader(doc, title, pageNum, totalPages);
+
+  const startY = SLIDE_CONFIG.headerHeight + 15;
+  
+  // Table Header
+  const headerY = startY;
+  const rowHeight = 10;
+  
+  // Columns
+  const col1Width = 210; // Link column
+  const col2Width = SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2 - col1Width; // Media column
+  
+  doc.setFillColor('#4f46e5'); // Indigo-600 (Blue/Purple)
+  doc.rect(SLIDE_CONFIG.margin, headerY, SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2, rowHeight, 'F');
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor('#ffffff');
+  
+  doc.text('Link', SLIDE_CONFIG.margin + 5, headerY + 7);
+  doc.text('Media', SLIDE_CONFIG.margin + col1Width + 5, headerY + 7);
+  
+  // Vertical Separator in Header
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.line(SLIDE_CONFIG.margin + col1Width, headerY, SLIDE_CONFIG.margin + col1Width, headerY + rowHeight);
+  
+  // Content Rows
+  let currentY = headerY + rowHeight;
+  doc.setFontSize(9);
+  doc.setLineWidth(0.2);
+  
+  links.forEach((link) => {
+    // Determine row height based on wrapped text
+    // Max width for link text is col1Width - padding
+    // But we want single line if possible, or wrap. 
+    // The image shows single lines mostly. Let's wrap if needed.
+    
+    // Actually, image shows simple table rows.
+    const cellHeight = 8;
+    
+    // Draw row borders
+    doc.setDrawColor(0, 0, 0);
+    doc.rect(SLIDE_CONFIG.margin, currentY, SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2, cellHeight);
+    doc.line(SLIDE_CONFIG.margin + col1Width, currentY, SLIDE_CONFIG.margin + col1Width, currentY + cellHeight);
+    
+    // Link Text (Blue, Underlined)
+    doc.setTextColor('#0000EE');
+    const linkText = link.url;
+    // Truncate if too long to fit in one line for cleanliness, or just let it print
+    // doc.text(linkText, SLIDE_CONFIG.margin + 5, currentY + 6);
+    // Let's use splitText to ensure it doesn't overflow, but print only 1 line
+    const splitLink = doc.splitTextToSize(linkText, col1Width - 10);
+    doc.text(splitLink[0] + (splitLink.length > 1 ? '...' : ''), SLIDE_CONFIG.margin + 5, currentY + 6);
+    
+    // Underline simulation
+    const linkWidth = doc.getTextWidth(splitLink[0] + (splitLink.length > 1 ? '...' : ''));
+    doc.setDrawColor(0, 0, 238);
+    doc.setLineWidth(0.1);
+    doc.line(SLIDE_CONFIG.margin + 5, currentY + 7, SLIDE_CONFIG.margin + 5 + linkWidth, currentY + 7);
+    
+    // Media Text (Black)
+    doc.setTextColor(REPORT_COLORS.text);
+    const mediaText = link.platform || '-';
+    doc.text(mediaText, SLIDE_CONFIG.margin + col1Width + 5, currentY + 6);
+    
+    currentY += cellHeight;
+  });
+
+  drawFooter(doc, brandName);
+};
+
+// SLIDE: Lampiran (Image)
+export const createLampiranSlide = (
+  doc: jsPDF,
+  image: string,
+  pageNum: number,
+  totalPages: number
+): void => {
+  addNewSlide(doc);
+  
+  // Custom Header for Lampiran (Minimalist)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(32);
+  doc.setTextColor('#0f172a'); // Dark Navy
+  doc.text('LAMPIRAN', SLIDE_CONFIG.margin, 30);
+  
+  const contentY = 45;
+  const contentHeight = SLIDE_CONFIG.height - contentY - 20;
+  const contentWidth = SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2;
+  
+  try {
+    // Draw Image (Fit to page)
+    // We assume the image is pre-composed or we just fit it.
+    // Ideally we keep aspect ratio.
+    const imgProps = doc.getImageProperties(image);
+    const imgRatio = imgProps.width / imgProps.height;
+    const pageRatio = contentWidth / contentHeight;
+    
+    let drawWidth = contentWidth;
+    let drawHeight = contentHeight;
+    
+    if (imgRatio > pageRatio) {
+        // Image is wider than page area
+        drawHeight = drawWidth / imgRatio;
+    } else {
+        // Image is taller than page area
+        drawWidth = drawHeight * imgRatio;
+    }
+    
+    const x = SLIDE_CONFIG.margin + (contentWidth - drawWidth) / 2;
+    const y = contentY + (contentHeight - drawHeight) / 2;
+    
+    doc.addImage(image, 'JPEG', x, y, drawWidth, drawHeight);
+    
+  } catch (e) {
+    doc.setFillColor('#f0f0f0');
+    doc.rect(SLIDE_CONFIG.margin, contentY, contentWidth, contentHeight, 'F');
+    doc.setFontSize(12);
+    doc.setTextColor(REPORT_COLORS.textLight);
+    doc.text('Error loading image', SLIDE_CONFIG.width / 2, contentY + contentHeight / 2, { align: 'center' });
+  }
+};
   doc: jsPDF, 
   links: ProductionLink[], 
   title: string, 
