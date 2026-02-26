@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { Plus, Trash2, Upload, Sparkles, FileText, Link, BarChart2, Image, Eye, Newspaper, Share2, ImagePlus, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,8 +12,6 @@ import { ReportFormData, ReportData, SocialMediaStat, CounterContentItem, Produc
 import ReportPreview from "./ReportPreview";
 
 interface ReportDataFormProps {
-  isOpen: boolean;
-  onClose: () => void;
   formData: ReportFormData;
   onUpdateFormData: (updates: Partial<ReportFormData>) => void;
   onAddSocialMediaStat: (stat: SocialMediaStat) => void;
@@ -36,8 +33,6 @@ interface ReportDataFormProps {
 }
 
 const ReportDataForm = ({
-  isOpen,
-  onClose,
   formData,
   onUpdateFormData,
   onAddSocialMediaStat,
@@ -101,7 +96,6 @@ const ReportDataForm = ({
   };
 
   const handleGenerateWithScreenshots = () => {
-    // Combine local modal screenshots with external (main page) screenshots
     const localImages = googleScreenshots.map(s => s.preview);
     const externalImages = (externalScreenshots || []).map(s => s.preview);
     const allImages = [...externalImages, ...localImages];
@@ -112,7 +106,6 @@ const ReportDataForm = ({
     const file = e.target.files?.[0];
     if (file) {
       onUpdateFormData({ [field]: file });
-      // Update preview
       const type = field === 'serpScreenshotBefore' ? 'before' : 'after';
       onUpdateScreenshotPreview(file, type);
     }
@@ -121,73 +114,47 @@ const ReportDataForm = ({
   const handleAddSocialStat = () => {
     if (newSocialStat.platform && newSocialStat.url) {
       onAddSocialMediaStat(newSocialStat as SocialMediaStat);
-      setNewSocialStat({
-        platform: '',
-        url: '',
-        views: 0,
-        likes: 0,
-        comments: 0,
-        shares: 0,
-      });
+      setNewSocialStat({ platform: '', url: '', views: 0, likes: 0, comments: 0, shares: 0 });
     }
   };
 
   const handleAddCounter = () => {
     if (newCounter.title && newCounter.url) {
       onAddCounterContent(newCounter as CounterContentItem);
-      setNewCounter({
-        title: '',
-        url: '',
-        type: 'news',
-      });
+      setNewCounter({ title: '', url: '', type: 'news' });
     }
   };
 
   const handleAddProductionLink = () => {
     if (newProductionLink.title && newProductionLink.url) {
       onAddProductionLink(newProductionLink as ProductionLink, productionType);
-      setNewProductionLink({
-        title: '',
-        url: '',
-      });
+      setNewProductionLink({ title: '', url: '' });
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] w-[1400px] max-h-[90vh] p-0">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-accent" />
-            Generate PDF Report
-          </DialogTitle>
-          <DialogDescription>
-            Lengkapi data berikut berdasarkan struktur slide report
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="flex gap-0 border-t border-border" style={{ height: 'calc(90vh - 140px)' }}>
-          {/* Left Column - Form */}
-          <div className="w-1/2 min-w-0 border-r border-border">
-            <ScrollArea className="h-full">
-              <Tabs defaultValue="basic" className="p-6 pt-4">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="basic" className="text-xs">
-                    <span className="hidden sm:inline">Slide 1-2:</span> Cover
-                  </TabsTrigger>
-                  <TabsTrigger value="screenshots" className="text-xs">
-                    <span className="hidden sm:inline">Slide 4-5:</span> SERP
-                  </TabsTrigger>
-                  <TabsTrigger value="ai" className="text-xs">
-                    <span className="hidden sm:inline">Slide 6-7:</span> AI
-                  </TabsTrigger>
-                  <TabsTrigger value="data" className="text-xs">
-                    <span className="hidden sm:inline">Slide 9:</span> Data
-                  </TabsTrigger>
-                  <TabsTrigger value="production" className="text-xs">
-                    <span className="hidden sm:inline">Slide 10+:</span> Links
-                  </TabsTrigger>
-                </TabsList>
+    <div className="flex h-[calc(100vh-120px)]">
+      {/* Left Column - Form */}
+      <div className="w-1/2 min-w-0 border-r border-border">
+        <ScrollArea className="h-full">
+          <Tabs defaultValue="basic" className="p-6 pt-4">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="basic" className="text-xs">
+                <span className="hidden sm:inline">Slide 1-2:</span> Cover
+              </TabsTrigger>
+              <TabsTrigger value="screenshots" className="text-xs">
+                <span className="hidden sm:inline">Slide 4-5:</span> SERP
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="text-xs">
+                <span className="hidden sm:inline">Slide 6-7:</span> AI
+              </TabsTrigger>
+              <TabsTrigger value="data" className="text-xs">
+                <span className="hidden sm:inline">Slide 9:</span> Data
+              </TabsTrigger>
+              <TabsTrigger value="production" className="text-xs">
+                <span className="hidden sm:inline">Slide 10+:</span> Links
+              </TabsTrigger>
+            </TabsList>
             
             {/* Slide 1-2: Cover & Executive Summary */}
             <TabsContent value="basic" className="space-y-4 mt-4">
@@ -518,7 +485,6 @@ const ReportDataForm = ({
                     </Button>
                   </div>
                   
-                  {/* List of stats */}
                   {formData.socialMediaStats.map((stat, index) => (
                     <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                       <span className="font-medium text-sm">{stat.platform}</span>
@@ -613,7 +579,6 @@ const ReportDataForm = ({
                 <span>Slide 10+: Production Results (News & Social Media Links)</span>
               </div>
 
-              {/* Production Links */}
               <Card>
                 <CardHeader className="py-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -653,7 +618,6 @@ const ReportDataForm = ({
                     </Button>
                   </div>
                   
-                  {/* News Production */}
                   {formData.newsProduction.length > 0 && (
                     <div>
                       <p className="text-xs text-muted-foreground mb-2">News Production:</p>
@@ -673,7 +637,6 @@ const ReportDataForm = ({
                     </div>
                   )}
                   
-                  {/* Social Media Production */}
                   {formData.socialMediaProduction.length > 0 && (
                     <div>
                       <p className="text-xs text-muted-foreground mb-2">Social Media Production:</p>
@@ -696,36 +659,32 @@ const ReportDataForm = ({
               </Card>
             </TabsContent>
             
-              </Tabs>
-            </ScrollArea>
+          </Tabs>
+          
+          {/* Generate Button - Fixed at bottom of form */}
+          <div className="sticky bottom-0 bg-background border-t border-border p-4 flex gap-3">
+            <Button onClick={onGenerateReport} disabled={isGenerating || !formData.brandName} className="flex-1">
+              <FileText className="mr-2 h-4 w-4" />
+              {isGenerating ? "Generating..." : "Generate PDF"}
+            </Button>
           </div>
+        </ScrollArea>
+      </div>
 
-          {/* Right Column - Realtime Preview */}
-          <div className="w-1/2 flex-shrink-0 flex flex-col">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
-              <Eye className="h-4 w-4 text-accent" />
-              <h3 className="text-sm font-semibold text-foreground">Realtime Preview</h3>
-              <span className="text-[10px] text-muted-foreground ml-auto">Scroll untuk semua slide</span>
-            </div>
-            <ScrollArea className="flex-1">
-              <div className="p-4 space-y-3">
-                <ReportPreview data={previewData} />
-              </div>
-            </ScrollArea>
-          </div>
+      {/* Right Column - Realtime Preview */}
+      <div className="w-1/2 flex-shrink-0 flex flex-col">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
+          <Eye className="h-4 w-4 text-accent" />
+          <h3 className="text-sm font-semibold text-foreground">Realtime Preview</h3>
+          <span className="text-[10px] text-muted-foreground ml-auto">Scroll untuk semua slide</span>
         </div>
-        
-        <DialogFooter className="p-6 pt-0 border-t border-border">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={onGenerateReport} disabled={isGenerating || !formData.brandName}>
-            <FileText className="mr-2 h-4 w-4" />
-            {isGenerating ? "Generating..." : "Generate PDF"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <ScrollArea className="flex-1">
+          <div className="p-4 space-y-3">
+            <ReportPreview data={previewData} />
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
   );
 };
 
