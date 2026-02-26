@@ -32,6 +32,7 @@ interface ReportDataFormProps {
   isGenerating: boolean;
   previewData: ReportData;
   onUpdateScreenshotPreview: (file: File, type: 'before' | 'after') => void;
+  googleScreenshots?: { file: File; preview: string }[];
 }
 
 const ReportDataForm = ({
@@ -54,6 +55,7 @@ const ReportDataForm = ({
   isGenerating,
   previewData,
   onUpdateScreenshotPreview,
+  googleScreenshots: externalScreenshots,
 }: ReportDataFormProps) => {
   // Temporary state for new items
   const [newSocialStat, setNewSocialStat] = useState<Partial<SocialMediaStat>>({
@@ -99,8 +101,11 @@ const ReportDataForm = ({
   };
 
   const handleGenerateWithScreenshots = () => {
-    const base64Images = googleScreenshots.map(s => s.preview);
-    onGenerateNewsDescription(base64Images.length > 0 ? base64Images : undefined);
+    // Combine local modal screenshots with external (main page) screenshots
+    const localImages = googleScreenshots.map(s => s.preview);
+    const externalImages = (externalScreenshots || []).map(s => s.preview);
+    const allImages = [...externalImages, ...localImages];
+    onGenerateNewsDescription(allImages.length > 0 ? allImages : undefined);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'serpScreenshotBefore' | 'serpScreenshotAfter') => {

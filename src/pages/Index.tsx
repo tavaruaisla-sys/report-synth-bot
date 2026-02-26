@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import KeywordInput from "@/components/report/KeywordInput";
 import SocialMediaInput from "@/components/report/SocialMediaInput";
 import SearchSourceTabs from "@/components/report/SearchSourceTabs";
+import GoogleScreenshotUpload from "@/components/report/GoogleScreenshotUpload";
 import AnalysisPreview from "@/components/report/AnalysisPreview";
 import SearchResults from "@/components/report/SearchResults";
 import ReportDataForm from "@/components/report/ReportDataForm";
@@ -11,12 +12,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useGoogleSearch } from "@/hooks/useGoogleSearch";
 import { useReportGenerator } from "@/hooks/useReportGenerator";
 
+interface GoogleScreenshot {
+  file: File;
+  preview: string;
+}
+
 interface SocialMediaUrl {
   id: string;
   url: string;
   platform: string;
 }
-
 const Index = () => {
   const { toast } = useToast();
   const { results, stats, isLoading, search } = useGoogleSearch();
@@ -30,6 +35,7 @@ const Index = () => {
     "buruk"
   ]);
   const [socialUrls, setSocialUrls] = useState<SocialMediaUrl[]>([]);
+  const [googleScreenshots, setGoogleScreenshots] = useState<GoogleScreenshot[]>([]);
   const [sources, setSources] = useState({
     googleAll: true,
     googleNews: true,
@@ -117,11 +123,25 @@ const Index = () => {
               <SearchSourceTabs sources={sources} onSourcesChange={setSources} />
             </div>
 
-            {/* Step 3: Social Media URLs */}
+            {/* Step 3: Google Screenshots */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
                   3
+                </span>
+                <h2 className="text-lg font-semibold text-foreground">Upload Screenshot Google (Opsional)</h2>
+              </div>
+              <GoogleScreenshotUpload
+                screenshots={googleScreenshots}
+                onScreenshotsChange={setGoogleScreenshots}
+              />
+            </div>
+
+            {/* Step 4: Social Media URLs */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                  4
                 </span>
                 <h2 className="text-lg font-semibold text-foreground">URL Social Media (Opsional)</h2>
               </div>
@@ -182,6 +202,7 @@ const Index = () => {
         isGenerating={reportGenerator.isGenerating}
         previewData={reportGenerator.previewData}
         onUpdateScreenshotPreview={reportGenerator.updateScreenshotPreview}
+        googleScreenshots={googleScreenshots}
       />
 
       {/* Footer */}
