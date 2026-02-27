@@ -499,28 +499,39 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
 
       {/* Production Links - Social Media */}
       {data.socialMediaProduction?.length > 0 && (
-        <SlideWrapper>
-          <SlideHeader title="SOCIAL MEDIA PRODUCTION LINKS" pageNum={13} />
-          <div className="p-8 flex flex-col h-full overflow-hidden">
-             <div className="border border-black text-[8px] flex-1 overflow-y-auto">
-                {/* Header */}
-                <div className="grid grid-cols-4 bg-[#14532d] text-white font-bold text-center sticky top-0 z-10">
-                   <div className="p-2 border-r border-white/20">Link</div>
-                   <div className="p-2 border-r border-white/20">Link</div>
-                   <div className="p-2 border-r border-white/20">Link</div>
-                   <div className="p-2">Link</div>
-                </div>
-                {/* Content Grid */}
-                <div className="grid grid-cols-4">
-                   {data.socialMediaProduction.map((link, i) => (
-                      <div key={i} className="p-2 border-b border-r border-black/10 break-all text-blue-700 underline hover:bg-muted/20">
-                         {link.url}
+        <>
+          {Array.from({ length: Math.ceil(data.socialMediaProduction.length / 40) }).map((_, pageIndex) => {
+            const chunk = data.socialMediaProduction.slice(pageIndex * 40, (pageIndex + 1) * 40);
+            return (
+              <SlideWrapper key={`social-prod-${pageIndex}`}>
+                <SlideHeader 
+                  title={pageIndex === 0 ? "SOCIAL MEDIA PRODUCTION LINKS" : "SOCIAL MEDIA PRODUCTION LINKS (Cont.)"} 
+                  pageNum={13 + pageIndex} 
+                />
+                <div className="p-8 flex flex-col h-full overflow-hidden">
+                   <div className="border border-black text-[8px] flex-1">
+                      {/* Header */}
+                      <div className="grid grid-cols-4 bg-[#14532d] text-white font-bold text-center">
+                         <div className="p-2 border-r border-white/20">Link</div>
+                         <div className="p-2 border-r border-white/20">Link</div>
+                         <div className="p-2 border-r border-white/20">Link</div>
+                         <div className="p-2">Link</div>
                       </div>
-                   ))}
+                      {/* Content Grid */}
+                      <div className="grid grid-cols-4">
+                         {chunk.map((link, i) => (
+                            <div key={i} className="p-2 border-b border-r border-black/10 break-all text-blue-700 underline hover:bg-muted/20 truncate">
+                               {link.url}
+                            </div>
+                         ))}
+                         {/* Fill empty cells to maintain grid if needed, or just leave blank */}
+                      </div>
+                   </div>
                 </div>
-             </div>
-          </div>
-        </SlideWrapper>
+              </SlideWrapper>
+            );
+          })}
+        </>
       )}
       {/* Last: Lampiran */}
       {data.lampiranImages?.length > 0 && (
