@@ -99,71 +99,82 @@ export const createExecutiveSummarySlide = (doc: jsPDF, data: ReportData, pageNu
   doc.text('SOSIAL MEDIA - TIKTOK', SLIDE_CONFIG.margin, currentY);
   currentY += 10;
 
-  // Aktivitas Akun Lawan
+  // 2-Column Layout for Activities
+  const colGap = 10;
+  const colWidth = (SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2 - colGap) / 2;
+  
+  // Left Column: Aktivitas Akun Lawan
+  let leftY = currentY;
+  const leftX = SLIDE_CONFIG.margin;
+
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(0, 0, 0);
-  doc.text('Aktivitas Akun Lawan', SLIDE_CONFIG.margin, currentY);
-  currentY += 8;
+  doc.text('Aktivitas Akun Lawan', leftX, leftY);
+  leftY += 8;
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   
   // Bullet 1: Sebelum
-  doc.circle(SLIDE_CONFIG.margin + 2, currentY - 1, 1, 'F');
+  doc.circle(leftX + 2, leftY - 1, 1, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.text('Sebelum:', SLIDE_CONFIG.margin + 8, currentY);
+  doc.text('Sebelum:', leftX + 8, leftY);
   const widthBefore = doc.getTextWidth('Sebelum:');
   doc.setFont('helvetica', 'normal');
-  doc.text(` ${data.socialMediaAccountStatusBefore || '-'}`, SLIDE_CONFIG.margin + 8 + widthBefore, currentY);
-  currentY += 6;
+  doc.text(` ${data.socialMediaAccountStatusBefore || '-'}`, leftX + 8 + widthBefore, leftY);
+  leftY += 6;
 
   // Bullet 2: Sesudah
-  doc.circle(SLIDE_CONFIG.margin + 2, currentY - 1, 1, 'F');
+  doc.circle(leftX + 2, leftY - 1, 1, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.text('Sesudah:', SLIDE_CONFIG.margin + 8, currentY);
+  doc.text('Sesudah:', leftX + 8, leftY);
   const widthAfter = doc.getTextWidth('Sesudah:');
   doc.setFont('helvetica', 'normal');
-  doc.text(` ${data.socialMediaAccountStatusAfter || '-'}`, SLIDE_CONFIG.margin + 8 + widthAfter, currentY);
-  currentY += 6;
+  doc.text(` ${data.socialMediaAccountStatusAfter || '-'}`, leftX + 8 + widthAfter, leftY);
+  leftY += 6;
 
   // Note
   if (data.socialMediaAccountStatusNote) {
     doc.setFont('helvetica', 'italic');
     doc.setFontSize(9);
-    const noteLines = doc.splitTextToSize(data.socialMediaAccountStatusNote, SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2 - 20);
-    doc.text(noteLines, SLIDE_CONFIG.margin + 8, currentY);
-    currentY += (noteLines.length * 5) + 6;
-  } else {
-    currentY += 6;
+    const noteLines = doc.splitTextToSize(data.socialMediaAccountStatusNote, colWidth - 10);
+    doc.text(noteLines, leftX + 8, leftY);
+    // leftY += (noteLines.length * 5) + 6; // Not needed as we don't continue below
   }
 
-  // Aktivitas Counter Kita
+  // Right Column: Aktivitas Counter Kita
+  let rightY = currentY;
+  const rightX = SLIDE_CONFIG.margin + colWidth + colGap;
+
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(0, 0, 0); // Black
-  doc.text('Aktivitas Counter Kita', SLIDE_CONFIG.margin, currentY);
-  currentY += 8;
+  doc.text('Aktivitas Counter Kita', rightX, rightY);
+  rightY += 8;
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
 
   // Bullet 1
-  doc.circle(SLIDE_CONFIG.margin + 2, currentY - 1, 1, 'F');
+  doc.circle(rightX + 2, rightY - 1, 1, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.text('Total views konten counter:', SLIDE_CONFIG.margin + 8, currentY);
+  doc.text('Total views konten counter:', rightX + 8, rightY);
+  // Break value to next line if needed or same line
+  // Let's keep same line logic but wrap if needed? 
+  // For PDF summary slides usually simple text.
   const widthViews = doc.getTextWidth('Total views konten counter:');
   doc.setFont('helvetica', 'normal');
-  doc.text(` ${data.socialMediaCounterTotalViews || '-'}`, SLIDE_CONFIG.margin + 8 + widthViews, currentY);
-  currentY += 6;
+  doc.text(` ${data.socialMediaCounterTotalViews || '-'}`, rightX + 8 + widthViews, rightY);
+  rightY += 6;
 
   // Bullet 2
-  doc.circle(SLIDE_CONFIG.margin + 2, currentY - 1, 1, 'F');
+  doc.circle(rightX + 2, rightY - 1, 1, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.text('Total engagement:', SLIDE_CONFIG.margin + 8, currentY);
+  doc.text('Total engagement:', rightX + 8, rightY);
   const widthEng = doc.getTextWidth('Total engagement:');
   doc.setFont('helvetica', 'normal');
-  doc.text(` ${data.socialMediaCounterTotalEngagement || '-'}`, SLIDE_CONFIG.margin + 8 + widthEng, currentY);
+  doc.text(` ${data.socialMediaCounterTotalEngagement || '-'}`, rightX + 8 + widthEng, rightY);
   
   drawFooter(doc, data.brandName);
 };

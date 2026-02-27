@@ -55,39 +55,41 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
               SOSIAL MEDIA - TIKTOK
             </h3>
             
-            {/* Aktivitas Akun Lawan */}
-            <div className="space-y-1">
-              <h4 className="font-bold text-[11px] text-black">Aktivitas Akun Lawan</h4>
-              <ul className="space-y-1 list-none ml-1">
-                <li className="text-[10px] flex items-center gap-2 text-black">
-                  <span className="h-1 w-1 rounded-full bg-black" />
-                  <span><span className="font-bold">Sebelum:</span> {data.socialMediaAccountStatusBefore || '-'}</span>
-                </li>
-                <li className="text-[10px] flex items-center gap-2 text-black">
-                  <span className="h-1 w-1 rounded-full bg-black" />
-                  <span><span className="font-bold">Sesudah:</span> {data.socialMediaAccountStatusAfter || '-'}</span>
-                </li>
-              </ul>
-              {data.socialMediaAccountStatusNote && (
-                <p className="text-[10px] italic ml-4 text-black">
-                  {data.socialMediaAccountStatusNote}
-                </p>
-              )}
-            </div>
+            <div className="grid grid-cols-2 gap-8">
+              {/* Left: Aktivitas Akun Lawan */}
+              <div className="space-y-1">
+                <h4 className="font-bold text-[11px] text-black">Aktivitas Akun Lawan</h4>
+                <ul className="space-y-1 list-none ml-1">
+                  <li className="text-[10px] flex items-center gap-2 text-black">
+                    <span className="h-1 w-1 rounded-full bg-black shrink-0" />
+                    <span><span className="font-bold">Sebelum:</span> {data.socialMediaAccountStatusBefore || '-'}</span>
+                  </li>
+                  <li className="text-[10px] flex items-center gap-2 text-black">
+                    <span className="h-1 w-1 rounded-full bg-black shrink-0" />
+                    <span><span className="font-bold">Sesudah:</span> {data.socialMediaAccountStatusAfter || '-'}</span>
+                  </li>
+                </ul>
+                {data.socialMediaAccountStatusNote && (
+                  <p className="text-[10px] italic ml-4 text-black">
+                    {data.socialMediaAccountStatusNote}
+                  </p>
+                )}
+              </div>
 
-            {/* Aktivitas Counter Kita */}
-            <div className="space-y-1">
-              <h4 className="font-bold text-[11px] text-black">Aktivitas Counter Kita</h4>
-              <ul className="space-y-1 list-none ml-1">
-                <li className="text-[10px] flex items-center gap-2 text-black">
-                  <span className="h-1 w-1 rounded-full bg-black" />
-                  <span><span className="font-bold">Total views konten counter:</span> {data.socialMediaCounterTotalViews || '-'}</span>
-                </li>
-                <li className="text-[10px] flex items-center gap-2 text-black">
-                  <span className="h-1 w-1 rounded-full bg-black" />
-                  <span><span className="font-bold">Total engagement:</span> {data.socialMediaCounterTotalEngagement || '-'}</span>
-                </li>
-              </ul>
+              {/* Right: Aktivitas Counter Kita */}
+              <div className="space-y-1">
+                <h4 className="font-bold text-[11px] text-black">Aktivitas Counter Kita</h4>
+                <ul className="space-y-1 list-none ml-1">
+                  <li className="text-[10px] flex items-center gap-2 text-black">
+                    <span className="h-1 w-1 rounded-full bg-black shrink-0" />
+                    <span><span className="font-bold">Total views konten counter:</span> {data.socialMediaCounterTotalViews || '-'}</span>
+                  </li>
+                  <li className="text-[10px] flex items-center gap-2 text-black">
+                    <span className="h-1 w-1 rounded-full bg-black shrink-0" />
+                    <span><span className="font-bold">Total engagement:</span> {data.socialMediaCounterTotalEngagement || '-'}</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
