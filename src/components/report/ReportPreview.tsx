@@ -473,31 +473,41 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
 
       {/* Production Links - News */}
       {data.newsProduction?.length > 0 && (
-        <SlideWrapper>
-          <SlideHeader title="PRODUCTION RESULTS - NEWS" pageNum={12} />
-          <div className="p-8 flex flex-col h-full overflow-hidden">
-             <div className="border border-indigo-600 text-[8px] flex-1 overflow-y-auto">
-                {/* Header */}
-                <div className="flex bg-indigo-600 text-white font-bold sticky top-0 z-10">
-                   <div className="p-2 w-[70%] border-r border-white/20">Link</div>
-                   <div className="p-2 w-[30%]">Media</div>
-                </div>
-                {/* Content Rows */}
-                <div className="flex flex-col">
-                   {data.newsProduction.map((link, i) => (
-                      <div key={i} className="flex border-b border-indigo-100 last:border-0 hover:bg-muted/20">
-                         <div className="p-2 w-[70%] border-r border-indigo-100 break-all text-blue-700 underline">
-                            {link.url}
-                         </div>
-                         <div className="p-2 w-[30%] text-black truncate font-medium">
-                            {link.platform || '-'}
-                         </div>
+        <>
+          {Array.from({ length: Math.ceil(data.newsProduction.length / 14) }).map((_, pageIndex) => {
+            const chunk = data.newsProduction.slice(pageIndex * 14, (pageIndex + 1) * 14);
+            return (
+              <SlideWrapper key={`news-prod-${pageIndex}`}>
+                <SlideHeader 
+                  title={pageIndex === 0 ? "PRODUCTION RESULTS - NEWS" : "PRODUCTION RESULTS - NEWS (Cont.)"} 
+                  pageNum={12 + pageIndex} 
+                />
+                <div className="p-8 flex flex-col h-full overflow-hidden">
+                   <div className="border border-indigo-600 text-[8px] flex-1">
+                      {/* Header */}
+                      <div className="flex bg-indigo-600 text-white font-bold sticky top-0 z-10">
+                         <div className="p-2 w-[70%] border-r border-white/20">Link</div>
+                         <div className="p-2 w-[30%]">Media</div>
                       </div>
-                   ))}
+                      {/* Content Rows */}
+                      <div className="flex flex-col">
+                         {chunk.map((link, i) => (
+                            <div key={i} className="flex border-b border-indigo-100 last:border-0 hover:bg-muted/20">
+                               <div className="p-2 w-[70%] border-r border-indigo-100 break-all text-blue-700 underline truncate">
+                                  {link.url}
+                               </div>
+                               <div className="p-2 w-[30%] text-black truncate font-medium">
+                                  {link.platform || '-'}
+                               </div>
+                            </div>
+                         ))}
+                      </div>
+                   </div>
                 </div>
-             </div>
-          </div>
-        </SlideWrapper>
+              </SlideWrapper>
+            );
+          })}
+        </>
       )}
 
       {/* Production Links - Social Media */}
