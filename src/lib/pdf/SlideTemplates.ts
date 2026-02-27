@@ -293,28 +293,76 @@ export const createAfterSlide = (
   const contentWidth = SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2;
   
   if (images && images.length > 0) {
-    // 3-Column Layout (Optimized for vertical screenshots)
-    const cols = 3;
-    const gap = 10;
-    const cellWidth = (contentWidth - (cols - 1) * gap) / cols;
+    // Dynamic Auto-Layout based on image count
+    const count = images.length;
+    let cols = 1;
+    let rows = 1;
     
-    // Use up to 3 images for the main row
-    images.slice(0, 3).forEach((imgData, index) => {
-      const x = SLIDE_CONFIG.margin + index * (cellWidth + gap);
-      const y = contentY;
+    // Determine grid dimensions
+    if (count === 1) { cols = 1; rows = 1; }
+    else if (count === 2) { cols = 2; rows = 1; }
+    else if (count === 3) { cols = 3; rows = 1; }
+    else if (count === 4) { cols = 2; rows = 2; }
+    else if (count >= 5 && count <= 6) { cols = 3; rows = 2; }
+    else if (count >= 7 && count <= 8) { cols = 4; rows = 2; }
+    else { cols = 4; rows = 2; } // Max 8 for now, or 4x2
+    
+    // Limit to max 8 images per slide to maintain visibility
+    const displayImages = images.slice(0, 8);
+    const gap = 5;
+    
+    const cellWidth = (contentWidth - (cols - 1) * gap) / cols;
+    const cellHeight = (contentHeight - (rows - 1) * gap) / rows;
+    
+    displayImages.forEach((imgData, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      
+      const x = SLIDE_CONFIG.margin + col * (cellWidth + gap);
+      const y = contentY + row * (cellHeight + gap);
       
       try {
-        // Draw image
-        doc.addImage(imgData, 'JPEG', x, y, cellWidth, contentHeight);
+        // Draw image (cover/contain style logic)
+        // For screenshots, we usually want to see the full content width-wise, 
+        // but clip height if too long, or fit.
+        // Let's use 'contain' logic: calculate ratio.
         
-        // Add subtle shadow/border
-        doc.setDrawColor(220, 220, 220);
+        const imgProps = doc.getImageProperties(imgData);
+        const imgRatio = imgProps.width / imgProps.height;
+        const cellRatio = cellWidth / cellHeight;
+        
+        let drawW = cellWidth;
+        let drawH = cellHeight;
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        // Fit image within cell (contain)
+        if (imgRatio > cellRatio) {
+            // Image is wider than cell
+            drawH = drawW / imgRatio;
+            offsetY = (cellHeight - drawH) / 2;
+        } else {
+            // Image is taller than cell
+            drawW = drawH * imgRatio;
+            offsetX = (cellWidth - drawW) / 2;
+        }
+        
+        // Draw background for cell
+        doc.setFillColor('#f8fafc');
+        doc.rect(x, y, cellWidth, cellHeight, 'F');
+        
+        // Draw image centered
+        doc.addImage(imgData, 'JPEG', x + offsetX, y + offsetY, drawW, drawH);
+        
+        // Border
+        doc.setDrawColor(226, 232, 240); // slate-200
         doc.setLineWidth(0.5);
-        doc.rect(x, y, cellWidth, contentHeight);
+        doc.rect(x, y, cellWidth, cellHeight);
+        
       } catch (e) {
         // Fallback
         doc.setFillColor('#f0f0f0');
-        doc.rect(x, y, cellWidth, contentHeight, 'F');
+        doc.rect(x, y, cellWidth, cellHeight, 'F');
       }
     });
   } else {
