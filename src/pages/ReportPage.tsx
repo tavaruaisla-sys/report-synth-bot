@@ -45,7 +45,14 @@ const ReportPage = () => {
           </Button>
           <div className="h-5 w-px bg-border" />
           <h1 className="text-lg font-semibold text-foreground">Generate PDF Report</h1>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <Button 
+              onClick={reportGenerator.generateReport} 
+              disabled={reportGenerator.isGenerating}
+              size="sm"
+            >
+              {reportGenerator.isGenerating ? "Exporting..." : "Export PDF"}
+            </Button>
             <ReportHistory onLoadReport={reportGenerator.loadReport} />
           </div>
         </div>

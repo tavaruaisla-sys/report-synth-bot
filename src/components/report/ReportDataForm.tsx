@@ -1216,11 +1216,11 @@ const ReportDataForm = ({
           
           {/* Generate Button - Fixed at bottom of form */}
           <div className="sticky bottom-0 bg-background border-t border-border p-4 flex gap-3">
-            <Button onClick={onSave} disabled={isSaving || !formData.brandName} variant="outline" className="flex-1">
+            <Button onClick={onSave} disabled={isSaving} variant="outline" className="flex-1">
               <FileText className="mr-2 h-4 w-4" />
               {isSaving ? "Saving..." : "Save Draft"}
             </Button>
-            <Button onClick={onGenerateReport} disabled={isGenerating || !formData.brandName} className="flex-1">
+            <Button onClick={onGenerateReport} disabled={isGenerating} className="flex-1">
               <FileText className="mr-2 h-4 w-4" />
               {isGenerating ? "Generating..." : "Generate PDF"}
             </Button>
