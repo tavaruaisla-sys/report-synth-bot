@@ -227,19 +227,22 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
           {/* Content */}
           <div className="flex-1 min-h-0">
             {data.serpScreenshotAfter2 && data.serpScreenshotAfter2.length > 0 ? (
-              <div className="grid grid-cols-3 gap-4 h-full">
-                {data.serpScreenshotAfter2.slice(0, 3).map((src, i) => (
-                   <div key={i} className="relative w-full h-full min-h-0 bg-white border border-gray-200 shadow-sm rounded-sm overflow-hidden">
+              <div className={`grid gap-4 h-full ${
+                data.serpScreenshotAfter2.length === 1 ? 'grid-cols-1' :
+                data.serpScreenshotAfter2.length === 2 ? 'grid-cols-2' :
+                data.serpScreenshotAfter2.length === 3 ? 'grid-cols-3' :
+                data.serpScreenshotAfter2.length === 4 ? 'grid-cols-2 grid-rows-2' :
+                data.serpScreenshotAfter2.length <= 6 ? 'grid-cols-3 grid-rows-2' :
+                'grid-cols-4 grid-rows-2'
+              }`}>
+                {data.serpScreenshotAfter2.slice(0, 8).map((src, i) => (
+                   <div key={i} className="relative w-full h-full min-h-0 bg-white border border-gray-200 shadow-sm rounded-sm overflow-hidden flex items-center justify-center bg-slate-50">
                      <img 
                        src={src} 
                        alt={`AI Result After ${i+1}`} 
-                       className="w-full h-full object-cover object-top"
+                       className="max-w-full max-h-full object-contain"
                      />
                    </div>
-                ))}
-                {/* Fill empty slots if less than 3 images to maintain grid structure */}
-                {[...Array(Math.max(0, 3 - data.serpScreenshotAfter2.length))].map((_, i) => (
-                  <div key={`empty-${i}`} className="bg-gray-50 border border-dashed border-gray-200 rounded-sm" />
                 ))}
               </div>
             ) : (
