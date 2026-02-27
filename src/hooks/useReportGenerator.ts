@@ -570,6 +570,7 @@ export function useReportGenerator({
         contentProduction: formData.contentProduction || defaultReportFormData.contentProduction,
         newsProduction: formData.newsProduction,
         socialMediaProduction: formData.socialMediaProduction,
+        lampiranImages: lampiranUrls,
       };
 
       // Generate and download PDF

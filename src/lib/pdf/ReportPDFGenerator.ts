@@ -45,8 +45,8 @@ export class ReportPDFGenerator {
     pages += 1; // Appendix divider
     pages += 1; // Data Summary
     
-    if (this.data.socialMediaStats.length > 0) pages += 1;
-    if (this.data.counterContent.length > 0) pages += 1;
+    if (this.data.socialMediaStats?.length > 0) pages += 1;
+    if (this.data.counterContent?.length > 0) pages += 1;
     
     // Content Production Summary (Slide 10)
     if (this.data.contentProduction) pages += 1;
@@ -56,17 +56,17 @@ export class ReportPDFGenerator {
     
     // News Production (New Table Layout: ~12-14 items per page depending on wrapping)
     const newsPerPage = 14; 
-    if (this.data.newsProduction.length > 0) {
+    if (this.data.newsProduction?.length > 0) {
       pages += Math.ceil(this.data.newsProduction.length / newsPerPage);
     }
     
     // Social Media Production (Grid Layout: 40 items per page)
-    if (this.data.socialMediaProduction.length > 0) {
+    if (this.data.socialMediaProduction?.length > 0) {
       pages += Math.ceil(this.data.socialMediaProduction.length / linksPerPage);
     }
     
     // Lampiran Slides
-    if (this.data.lampiranImages.length > 0) {
+    if (this.data.lampiranImages?.length > 0) {
       pages += this.data.lampiranImages.length;
     }
     
@@ -140,7 +140,7 @@ export class ReportPDFGenerator {
     // Optional slides based on available data
     
     // Social Media Stats
-    if (this.data.socialMediaStats.length > 0) {
+    if (this.data.socialMediaStats?.length > 0) {
       currentPage++;
       createSocialMediaStatsSlide(
         this.doc, 
@@ -152,7 +152,7 @@ export class ReportPDFGenerator {
     }
     
     // Counter Content
-    if (this.data.counterContent.length > 0) {
+    if (this.data.counterContent?.length > 0) {
       currentPage++;
       createCounterContentSlide(
         this.doc, 
@@ -170,7 +170,7 @@ export class ReportPDFGenerator {
     }
 
     // News Production Links
-    if (this.data.newsProduction.length > 0) {
+    if (this.data.newsProduction?.length > 0) {
       const itemsPerPage = 14; // Matches the table layout height
       for (let i = 0; i < this.data.newsProduction.length; i += itemsPerPage) {
         currentPage++;
@@ -187,7 +187,7 @@ export class ReportPDFGenerator {
     }
     
     // Social Media Production Links
-    if (this.data.socialMediaProduction.length > 0) {
+    if (this.data.socialMediaProduction?.length > 0) {
       const itemsPerPage = 40;
       for (let i = 0; i < this.data.socialMediaProduction.length; i += itemsPerPage) {
         currentPage++;
@@ -204,7 +204,7 @@ export class ReportPDFGenerator {
     }
     
     // Lampiran Slides
-    if (this.data.lampiranImages.length > 0) {
+    if (this.data.lampiranImages?.length > 0) {
       this.data.lampiranImages.forEach((img) => {
         currentPage++;
         createLampiranSlide(this.doc, img, currentPage, this.totalPages);
