@@ -334,6 +334,90 @@ const ReportPreview = ({ data }: ReportPreviewProps) => {
         </div>
       </SlideWrapper>
 
+      {/* Slide 10: Content Production Summary */}
+      {data.contentProduction && (
+        <SlideWrapper>
+          <SlideHeader title="PRODUKSI & DISTRIBUSI KONTEN" pageNum={10} />
+          <div className="p-8 flex h-full overflow-hidden text-black gap-8">
+            
+            {/* Left Column: News */}
+            <div className="flex-1 flex flex-col gap-4">
+              <h3 className="text-xl font-medium">News</h3>
+              
+              <div className="space-y-4 text-xs">
+                {/* 1. Action */}
+                <div className="flex gap-2">
+                  <span className="font-bold">1.</span>
+                  <p>{data.contentProduction.newsAction}</p>
+                </div>
+                
+                {/* 2. Results */}
+                <div className="flex gap-2">
+                  <span className="font-bold">2.</span>
+                  <div className="flex-1">
+                    <p className="font-bold mb-1">Results:</p>
+                    <div className="pl-4 space-y-1">
+                      {data.contentProduction.newsResults.split('\n').map((line, i) => (
+                        <div key={i} className="flex gap-2">
+                           <span className="mt-1.5 h-1.5 w-1.5 bg-black shrink-0" />
+                           <p>{line}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Social Media */}
+            <div className="flex-1 flex flex-col gap-4">
+              <h3 className="text-xl font-medium">Social Media</h3>
+              
+              <div className="space-y-4 text-xs">
+                {/* 1. Action */}
+                <div className="flex gap-2">
+                  <span className="font-bold">1.</span>
+                  <p>{data.contentProduction.socialAction}</p>
+                </div>
+                
+                {/* 2. Results */}
+                <div className="flex gap-2">
+                  <span className="font-bold">2.</span>
+                  <div className="flex-1">
+                    <p className="font-bold mb-1">Results:</p>
+                    <div className="pl-4">
+                      {data.contentProduction.socialResults.split('\n').map((line, i) => (
+                        <p key={i}>{line}</p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Followup */}
+                <div className="flex gap-2">
+                  <span className="font-bold">3.</span>
+                  <div className="flex-1">
+                    <p className="font-bold mb-1">Followup</p>
+                    <div className="pl-4">
+                       {data.contentProduction.socialFollowup.split('\n').map((line, i) => {
+                          const isListItem = line.match(/^[a-z]\./);
+                          return (
+                            <div key={i} className="flex gap-1">
+                               {!isListItem && <span>a.</span>}
+                               <p>{line}</p>
+                            </div>
+                          );
+                       })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </SlideWrapper>
+      )}
+
       {/* Optional: Social Media Stats */}
       {data.socialMediaStats?.length > 0 && (
         <SlideWrapper>

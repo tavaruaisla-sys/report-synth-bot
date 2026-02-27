@@ -16,6 +16,7 @@ import {
   createProductionLinksSlide,
   createNewsProductionSlide,
   createLampiranSlide,
+  createContentProductionSlide,
 } from './SlideTemplates';
 
 export class ReportPDFGenerator {
@@ -47,6 +48,9 @@ export class ReportPDFGenerator {
     if (this.data.socialMediaStats.length > 0) pages += 1;
     if (this.data.counterContent.length > 0) pages += 1;
     
+    // Content Production Summary (Slide 10)
+    if (this.data.contentProduction) pages += 1;
+
     // Calculate pages for production links (grid layout 4x10 = 40 items per page)
     const linksPerPage = 40;
     
@@ -159,6 +163,12 @@ export class ReportPDFGenerator {
       );
     }
     
+    // Content Production Summary (Slide 10)
+    if (this.data.contentProduction) {
+      currentPage++;
+      createContentProductionSlide(this.doc, this.data, currentPage, this.totalPages);
+    }
+
     // News Production Links
     if (this.data.newsProduction.length > 0) {
       const itemsPerPage = 14; // Matches the table layout height

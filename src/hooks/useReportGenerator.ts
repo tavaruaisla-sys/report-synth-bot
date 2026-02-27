@@ -87,6 +87,7 @@ export function useReportGenerator({
     counterContent: formData.counterContent || [],
     newsProduction: formData.newsProduction || [],
     socialMediaProduction: formData.socialMediaProduction || [],
+    contentProduction: formData.contentProduction || defaultReportFormData.contentProduction,
     lampiranImages: screenshotPreviews.lampiran,
   }), [formData, keywords, negativeKeywords, searchResults, searchStats, aiSummary, screenshotPreviews]);
 
@@ -255,6 +256,7 @@ export function useReportGenerator({
       keywordStats: data.keywordStats || [],
       productionStats: data.productionStats || { views: '0', likes: '0', comments: '0', saved: '0', shares: '0' },
       counterContent: data.counterContent || [],
+      contentProduction: data.contentProduction || defaultReportFormData.contentProduction,
       newsProduction: data.newsProduction || [],
       socialMediaProduction: data.socialMediaProduction || [],
       lampiranImages: Array.isArray(data.lampiranImages) 
@@ -565,6 +567,7 @@ export function useReportGenerator({
         keywordStats: formData.keywordStats || [],
         productionStats: formData.productionStats || { views: '0', likes: '0', comments: '0', saved: '0', shares: '0' },
         counterContent: formData.counterContent,
+        contentProduction: formData.contentProduction || defaultReportFormData.contentProduction,
         newsProduction: formData.newsProduction,
         socialMediaProduction: formData.socialMediaProduction,
       };

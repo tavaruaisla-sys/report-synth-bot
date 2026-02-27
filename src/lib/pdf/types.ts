@@ -16,6 +16,14 @@ export interface ProductionStats {
   shares: string;
 }
 
+export interface ContentProductionData {
+  newsAction: string;
+  newsResults: string;
+  socialAction: string;
+  socialResults: string;
+  socialFollowup: string;
+}
+
 export interface ReportData {
   // Basic Info
   reportTitle: string;
@@ -60,6 +68,9 @@ export interface ReportData {
   // Counter Content (manual input)
   counterContent: CounterContentItem[];
   
+  // Slide 10: Content Production (Summary)
+  contentProduction?: ContentProductionData;
+
   // Production Links (News & Social Media)
   newsProduction: ProductionLink[];
   socialMediaProduction: ProductionLink[];
@@ -142,6 +153,9 @@ export interface ReportFormData {
   // Counter Content
   counterContent: CounterContentItem[];
   
+  // Slide 10: Content Production (Summary)
+  contentProduction: ContentProductionData;
+
   // Production Links
   newsProduction: ProductionLink[];
   socialMediaProduction: ProductionLink[];
@@ -175,6 +189,13 @@ export const defaultReportFormData: ReportFormData = {
   keywordStats: [],
   productionStats: { views: '0', likes: '0', comments: '0', saved: '0', shares: '0' },
   counterContent: [],
+  contentProduction: {
+    newsAction: 'Menerbitkan 32 Artikel di media utama untuk menenggelamkan pemberitaan negatif dan mengisi SERP.',
+    newsResults: 'Hasil SERP Google News menunjukkan keyword “Rahmad Pribadi” dan “Dirut Pupuk Indonesia” masih memunculkan headline bernuansa negatif di halaman 1 (tema dominan: aturan/perjalanan dinas–isu etik),\nSementara keyword “PT Pupuk Indonesia” didominasi hasil positif/netral (program, bantuan, penghargaan, digitalisasi/command center).\nPada halaman lanjutan, beberapa headline negatif masih muncul kembali pada kueri personal/jabatan, sehingga berpotensi naik lagi jika ada pemicu isu baru.',
+    socialAction: 'Total video yang disebar di akun sosial media mencapai 296',
+    socialResults: 'a. Total Views: 2.077.049\nb. Total Engagement: 96.523(Like, Comment, Saved, Share)\nc. Terdapat komentar negatif non-organik, namun komentar positif mulai muncul secara organik.',
+    socialFollowup: 'Melanjutkan produksi konten bertema : Penurunan biaya produksi pupuk dan Modernisasi pabrik tua untuk peningkatan efisiensi dan keberlanjutan',
+  },
   newsProduction: [],
   socialMediaProduction: [],
   lampiranImages: [],

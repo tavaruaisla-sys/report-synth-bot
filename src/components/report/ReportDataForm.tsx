@@ -254,8 +254,11 @@ const ReportDataForm = ({
               <TabsTrigger value="data" className="text-xs">
                 <span className="hidden sm:inline">Slide 9:</span> Data
               </TabsTrigger>
+              <TabsTrigger value="content-summary" className="text-xs">
+                <span className="hidden sm:inline">Slide 10:</span> Content
+              </TabsTrigger>
               <TabsTrigger value="production" className="text-xs">
-                <span className="hidden sm:inline">Slide 10+:</span> Links
+                <span className="hidden sm:inline">Slide 11+:</span> Links
               </TabsTrigger>
               <TabsTrigger value="lampiran" className="text-xs">
                 <span className="hidden sm:inline">Last:</span> Lampiran
@@ -825,7 +828,7 @@ const ReportDataForm = ({
                       <Input
                         value={formData.productionStats?.views || ''}
                         onChange={(e) => onUpdateFormData({ 
-                          productionStats: { ...formData.productionStats, views: e.target.value } 
+                          productionStats: { ...formData.productionStats!, views: e.target.value } 
                         })}
                         placeholder="2.077.049"
                       />
@@ -835,7 +838,7 @@ const ReportDataForm = ({
                       <Input
                         value={formData.productionStats?.likes || ''}
                         onChange={(e) => onUpdateFormData({ 
-                          productionStats: { ...formData.productionStats, likes: e.target.value } 
+                          productionStats: { ...formData.productionStats!, likes: e.target.value } 
                         })}
                         placeholder="71,085"
                       />
@@ -845,7 +848,7 @@ const ReportDataForm = ({
                       <Input
                         value={formData.productionStats?.comments || ''}
                         onChange={(e) => onUpdateFormData({ 
-                          productionStats: { ...formData.productionStats, comments: e.target.value } 
+                          productionStats: { ...formData.productionStats!, comments: e.target.value } 
                         })}
                         placeholder="735"
                       />
@@ -855,7 +858,7 @@ const ReportDataForm = ({
                       <Input
                         value={formData.productionStats?.saved || ''}
                         onChange={(e) => onUpdateFormData({ 
-                          productionStats: { ...formData.productionStats, saved: e.target.value } 
+                          productionStats: { ...formData.productionStats!, saved: e.target.value } 
                         })}
                         placeholder="4,735"
                       />
@@ -865,7 +868,7 @@ const ReportDataForm = ({
                       <Input
                         value={formData.productionStats?.shares || ''}
                         onChange={(e) => onUpdateFormData({ 
-                          productionStats: { ...formData.productionStats, shares: e.target.value } 
+                          productionStats: { ...formData.productionStats!, shares: e.target.value } 
                         })}
                         placeholder="19,968"
                       />
@@ -874,12 +877,129 @@ const ReportDataForm = ({
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* Slide 10: Content Production Summary */}
+            <TabsContent value="content-summary" className="space-y-4 mt-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <FileText className="h-4 w-4" />
+                <span>Slide 10: Produksi & Distribusi Konten</span>
+              </div>
+
+              <Card>
+                <CardHeader className="py-3">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Newspaper className="h-4 w-4" />
+                    News Section
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs">1. Action (Input Text)</Label>
+                    <Textarea
+                      value={formData.contentProduction?.newsAction || ''}
+                      onChange={(e) => onUpdateFormData({
+                        contentProduction: { ...formData.contentProduction!, newsAction: e.target.value }
+                      })}
+                      rows={3}
+                      placeholder="Menerbitkan 32 Artikel..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label className="text-xs">2. Results (Input Text)</Label>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-6 text-xs"
+                            onClick={() => onUpdateFormData({
+                                contentProduction: {
+                                    ...formData.contentProduction!,
+                                    newsResults: 'Hasil SERP Google News menunjukkan keyword “Rahmad Pribadi” dan “Dirut Pupuk Indonesia” masih memunculkan headline bernuansa negatif di halaman 1 (tema dominan: aturan/perjalanan dinas–isu etik),\nSementara keyword “PT Pupuk Indonesia” didominasi hasil positif/netral (program, bantuan, penghargaan, digitalisasi/command center).\nPada halaman lanjutan, beberapa headline negatif masih muncul kembali pada kueri personal/jabatan, sehingga berpotensi naik lagi jika ada pemicu isu baru.'
+                                }
+                            })}
+                        >
+                            <Sparkles className="mr-1 h-3 w-3" />
+                            Generate Template
+                        </Button>
+                    </div>
+                    <Textarea
+                      value={formData.contentProduction?.newsResults || ''}
+                      onChange={(e) => onUpdateFormData({
+                        contentProduction: { ...formData.contentProduction!, newsResults: e.target.value }
+                      })}
+                      rows={6}
+                      placeholder="Hasil SERP Google News..."
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="py-3">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Share2 className="h-4 w-4" />
+                    Social Media Section
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs">1. Action (Input Text)</Label>
+                    <Textarea
+                      value={formData.contentProduction?.socialAction || ''}
+                      onChange={(e) => onUpdateFormData({
+                        contentProduction: { ...formData.contentProduction!, socialAction: e.target.value }
+                      })}
+                      rows={2}
+                      placeholder="Total video yang disebar..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">2. Results (Input Text)</Label>
+                    <Textarea
+                      value={formData.contentProduction?.socialResults || ''}
+                      onChange={(e) => onUpdateFormData({
+                        contentProduction: { ...formData.contentProduction!, socialResults: e.target.value }
+                      })}
+                      rows={4}
+                      placeholder="Total Views, Engagement..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label className="text-xs">3. Followup (Input Text)</Label>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-6 text-xs"
+                            onClick={() => onUpdateFormData({
+                                contentProduction: {
+                                    ...formData.contentProduction!,
+                                    socialFollowup: 'Melanjutkan produksi konten bertema : Penurunan biaya produksi pupuk dan Modernisasi pabrik tua untuk peningkatan efisiensi dan keberlanjutan'
+                                }
+                            })}
+                        >
+                            <Sparkles className="mr-1 h-3 w-3" />
+                            Generate Template
+                        </Button>
+                    </div>
+                    <Textarea
+                      value={formData.contentProduction?.socialFollowup || ''}
+                      onChange={(e) => onUpdateFormData({
+                        contentProduction: { ...formData.contentProduction!, socialFollowup: e.target.value }
+                      })}
+                      rows={3}
+                      placeholder="Melanjutkan produksi konten..."
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
             
-            {/* Slide 10+: Production Links */}
+            {/* Slide 11+: Production Links */}
             <TabsContent value="production" className="space-y-4 mt-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <Share2 className="h-4 w-4" />
-                <span>Slide 10+: Production Results (News & Social Media Links)</span>
+                <span>Slide 11+: Production Results (News & Social Media Links)</span>
               </div>
 
               <Card>

@@ -552,6 +552,110 @@ export const createCounterContentSlide = (doc: jsPDF, content: CounterContentIte
   drawFooter(doc, brandName);
 };
 
+// SLIDE: Content Production Summary
+export const createContentProductionSlide = (
+  doc: jsPDF,
+  data: ReportData,
+  pageNum: number,
+  totalPages: number
+): void => {
+  if (!data.contentProduction) return;
+
+  addNewSlide(doc);
+  drawHeader(doc, 'PRODUKSI & DISTRIBUSI KONTEN', pageNum, totalPages);
+
+  const startY = SLIDE_CONFIG.headerHeight + 15;
+  const colGap = 15;
+  const colWidth = (SLIDE_CONFIG.width - SLIDE_CONFIG.margin * 2 - colGap) / 2;
+  
+  // Left Column: News
+  let leftY = startY;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(16);
+  doc.setTextColor(REPORT_COLORS.text);
+  doc.text('News', SLIDE_CONFIG.margin, leftY);
+  leftY += 10;
+  
+  doc.setFontSize(11);
+  
+  // 1. Action
+  doc.text('1.', SLIDE_CONFIG.margin, leftY);
+  const actionLines = doc.splitTextToSize(data.contentProduction.newsAction, colWidth - 10);
+  doc.text(actionLines, SLIDE_CONFIG.margin + 8, leftY);
+  leftY += (actionLines.length * 6) + 4;
+  
+  // 2. Results
+  doc.text('2.', SLIDE_CONFIG.margin, leftY);
+  doc.text('Results:', SLIDE_CONFIG.margin + 8, leftY);
+  leftY += 6;
+  
+  const newsResults = data.contentProduction.newsResults.split('\n');
+  newsResults.forEach((line) => {
+    // Check if line starts with a bullet char or just treat as paragraph
+    // User requested bullet points for this section in the image
+    // Let's assume standard paragraph text, maybe with square bullets
+    doc.rect(SLIDE_CONFIG.margin + 10, leftY - 1, 1.5, 1.5, 'F'); // Square bullet
+    
+    const resLines = doc.splitTextToSize(line, colWidth - 20);
+    doc.text(resLines, SLIDE_CONFIG.margin + 15, leftY);
+    leftY += (resLines.length * 6) + 3;
+  });
+  
+  // Right Column: Social Media
+  let rightY = startY;
+  const rightX = SLIDE_CONFIG.margin + colWidth + colGap;
+  
+  doc.setFontSize(16);
+  doc.text('Social Media', rightX, rightY);
+  rightY += 10;
+  
+  doc.setFontSize(11);
+  
+  // 1. Action
+  doc.text('1.', rightX, rightY);
+  const socialActionLines = doc.splitTextToSize(data.contentProduction.socialAction, colWidth - 10);
+  doc.text(socialActionLines, rightX + 8, rightY);
+  rightY += (socialActionLines.length * 6) + 4;
+  
+  // 2. Results
+  doc.text('2.', rightX, rightY);
+  doc.text('Results:', rightX + 8, rightY);
+  rightY += 6;
+  
+  const socialResults = data.contentProduction.socialResults.split('\n');
+  socialResults.forEach((line) => {
+    const resLines = doc.splitTextToSize(line, colWidth - 20);
+    doc.text(resLines, rightX + 15, rightY);
+    rightY += (resLines.length * 6) + 2;
+  });
+  rightY += 4;
+  
+  // 3. Followup
+  doc.text('3.', rightX, rightY);
+  doc.text('Followup', rightX + 8, rightY);
+  rightY += 6;
+  
+  const followupLines = data.contentProduction.socialFollowup.split('\n');
+  followupLines.forEach((line) => {
+      // If user manually added 'a. ', respect it. If not, maybe just print text.
+      // The template text has "a. Melanjutkan..." implied or user types it.
+      // Let's just print the text with indentation.
+      const fLines = doc.splitTextToSize(line, colWidth - 20);
+      
+      // Check if it looks like a list item
+      let indent = 15;
+      if (!line.match(/^[a-z]\./)) {
+          doc.text('a.', rightX + 15, rightY);
+          indent = 22;
+      }
+      
+      doc.text(fLines, rightX + indent, rightY);
+      rightY += (fLines.length * 6) + 2;
+  });
+
+  drawFooter(doc, data.brandName);
+};
+
 // SLIDE: News Production Table (2-Column)
 export const createNewsProductionSlide = (
   doc: jsPDF,
@@ -687,6 +791,9 @@ export const createLampiranSlide = (
     doc.text('Error loading image', SLIDE_CONFIG.width / 2, contentY + contentHeight / 2, { align: 'center' });
   }
 };
+
+// SLIDE: Production Links (Grid Layout)
+export const createProductionLinksSlide = (
   doc: jsPDF, 
   links: ProductionLink[], 
   title: string, 
