@@ -520,6 +520,18 @@ export function useReportGenerator({
           }
       }
 
+      let lampiranUrls: string[] = [];
+      if (Array.isArray(formData.lampiranImages)) {
+          for (const item of formData.lampiranImages) {
+              if (item instanceof File) {
+                  const base64 = await fileToBase64(item);
+                  lampiranUrls.push(base64);
+              } else {
+                  lampiranUrls.push(item as string);
+              }
+          }
+      }
+
       // Build report data
       const reportData: ReportData = {
         reportTitle: formData.reportTitle,
