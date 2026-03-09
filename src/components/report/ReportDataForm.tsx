@@ -28,8 +28,8 @@ interface ReportDataFormProps {
   onGenerateReport: () => void;
   isGenerating: boolean;
   previewData: ReportData;
-  onUpdateScreenshotPreview: (file: File, type: 'before' | 'before2' | 'after' | 'after2') => void;
-  onRemoveScreenshotPreview: (index: number, type: 'before' | 'before2' | 'after' | 'after2') => void;
+  onUpdateScreenshotPreview: (file: File, type: 'before' | 'before2' | 'after' | 'after2' | 'lampiran') => void;
+  onRemoveScreenshotPreview: (index: number, type: 'before' | 'before2' | 'after' | 'after2' | 'lampiran') => void;
   googleScreenshots?: { file: File; preview: string }[];
   onSave: () => void;
   isSaving: boolean;
