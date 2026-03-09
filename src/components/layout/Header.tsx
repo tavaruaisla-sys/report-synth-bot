@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Search, Settings, History, Edit, Trash2, Calendar, LogOut } from "lucide-react";
+import { FileText, Search, History, Edit, Trash2, Calendar, LogOut, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -25,6 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { reportService, DBReport } from "@/services/reportService";
+import { dummyReportData } from "@/lib/dummyReportData";
 import { useToast } from "@/hooks/use-toast";
 
 const Header = () => {
@@ -64,6 +65,23 @@ const Header = () => {
     }
   };
 
+  const handleCreateDummy = async () => {
+    setIsLoading(true);
+    try {
+      const saved = await reportService.createReport(dummyReportData);
+      if (saved) {
+        toast({ title: "Dummy Report Dibuat", description: "Sample report dengan semua slide terisi." });
+        await fetchReports();
+      } else {
+        toast({ title: "Error", description: "Gagal membuat dummy report.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Gagal membuat dummy report.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="container flex h-16 items-center justify-between">
@@ -83,11 +101,16 @@ const Header = () => {
             <span className="hidden sm:inline">Analisis</span>
           </Button>
 
+          <Button variant="ghost" size="sm" className="gap-2" onClick={() => navigate("/report")}>
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline">Report</span>
+          </Button>
+
           <Sheet open={isOpen} onOpenChange={handleOpenChange}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2">
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">Report</span>
+                <History className="h-4 w-4" />
+                <span className="hidden sm:inline">Histori</span>
               </Button>
             </SheetTrigger>
             <SheetContent className="w-[400px] sm:w-[540px]">
@@ -95,8 +118,19 @@ const Header = () => {
                 <SheetTitle>Report History</SheetTitle>
                 <SheetDescription>Lihat dan kelola report yang tersimpan.</SheetDescription>
               </SheetHeader>
+
+              <div className="flex items-center gap-2 mt-4">
+                <Button variant="outline" size="sm" onClick={handleCreateDummy} disabled={isLoading}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Dummy Report
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => { setIsOpen(false); navigate("/report"); }}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Buat Report Baru
+                </Button>
+              </div>
               
-              <ScrollArea className="h-[calc(100vh-120px)] mt-6 pr-4">
+              <ScrollArea className="h-[calc(100vh-200px)] mt-4 pr-4">
                 {isLoading ? (
                   <div className="flex justify-center items-center h-20 text-sm text-muted-foreground">
                     Loading...
@@ -105,9 +139,6 @@ const Header = () => {
                   <div className="flex flex-col items-center justify-center h-40 text-muted-foreground border-2 border-dashed rounded-lg">
                     <FileText className="h-8 w-8 mb-2 opacity-50" />
                     <p className="text-sm">Belum ada report tersimpan</p>
-                    <Button variant="outline" size="sm" className="mt-3" onClick={() => { setIsOpen(false); navigate("/report"); }}>
-                      Buat Report Baru
-                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-3">
