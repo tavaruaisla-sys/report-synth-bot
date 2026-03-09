@@ -99,7 +99,14 @@ export function ReportHistory({ onLoadReport }: ReportHistoryProps) {
           </SheetDescription>
         </SheetHeader>
         
-        <ScrollArea className="h-[calc(100vh-120px)] mt-6 pr-4">
+        <div className="mt-4">
+          <Button variant="outline" size="sm" onClick={handleCreateDummy} disabled={isLoading}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Dummy Report
+          </Button>
+        </div>
+
+        <ScrollArea className="h-[calc(100vh-180px)] mt-4 pr-4">
           {isLoading ? (
             <div className="flex justify-center items-center h-20 text-sm text-muted-foreground">
               Loading...
