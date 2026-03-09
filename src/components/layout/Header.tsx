@@ -106,6 +106,11 @@ const Header = () => {
             <span className="hidden sm:inline">Report</span>
           </Button>
 
+          <Button variant="ghost" size="sm" className="gap-2" onClick={() => navigate("/brief")}>
+            <Zap className="h-4 w-4" />
+            <span className="hidden sm:inline">Issue Brief</span>
+          </Button>
+
           <Sheet open={isOpen} onOpenChange={handleOpenChange}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2">
