@@ -28,8 +28,8 @@ export default function IssueBriefPage() {
   const [keyword, setKeyword] = useState("");
   const [hashtags, setHashtags] = useState("");
   const [topComments, setTopComments] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
 
   // Output state
