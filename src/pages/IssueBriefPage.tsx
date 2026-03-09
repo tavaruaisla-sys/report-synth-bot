@@ -105,7 +105,7 @@ export default function IssueBriefPage() {
       toast({ title: "Platform wajib dipilih", variant: "destructive" });
       return;
     }
-    if (!caption && !imageFile) {
+    if (!caption && !imageFiles.length) {
       toast({ title: "Isi caption atau upload gambar", variant: "destructive" });
       return;
     }
