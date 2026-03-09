@@ -163,9 +163,12 @@ const Header = () => {
             </SheetContent>
           </Sheet>
 
-          <Button variant="ghost" size="icon">
-            <Settings className="h-4 w-4" />
-          </Button>
+          {user && (
+            <Button variant="ghost" size="sm" className="gap-2 text-destructive hover:text-destructive" onClick={async () => { await signOut(); navigate("/auth"); }}>
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Keluar</span>
+            </Button>
+          )}
         </nav>
       </div>
     </header>
