@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Search, Settings, History, Edit, Trash2, Calendar } from "lucide-react";
+import { FileText, Search, Settings, History, Edit, Trash2, Calendar, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
