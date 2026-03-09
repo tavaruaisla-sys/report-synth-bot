@@ -53,34 +53,45 @@ export default function IssueBriefPage() {
     setIsLoadingHistory(false);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setImageFiles((prev) => [...prev, ...files]);
+    setImagePreviews((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
   };
 
-  const extractTextFromImage = async () => {
-    if (!imageFile) return;
+  const removeImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const extractTextFromImages = async () => {
+    if (!imageFiles.length) return;
     setIsExtracting(true);
     try {
-      const fileName = `brief-${Date.now()}-${imageFile.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("report-images")
-        .upload(fileName, imageFile);
-      if (uploadError) throw uploadError;
+      const extractedTexts: string[] = [];
+      for (const file of imageFiles) {
+        const fileName = `brief-${Date.now()}-${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("report-images")
+          .upload(fileName, file);
+        if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage.from("report-images").getPublicUrl(uploadData.path);
-      const imageUrl = urlData.publicUrl;
+        const { data: urlData } = supabase.storage.from("report-images").getPublicUrl(uploadData.path);
 
-      const { data, error } = await supabase.functions.invoke("extract-image-text", {
-        body: { image_url: imageUrl },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+        const { data, error } = await supabase.functions.invoke("extract-image-text", {
+          body: { image_url: urlData.publicUrl },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        extractedTexts.push(data.extracted_text);
+      }
 
-      setCaption((prev) => (prev ? prev + "\n\n" : "") + data.extracted_text);
-      toast({ title: "Teks Diekstrak", description: "Teks dari gambar berhasil ditambahkan ke caption." });
+      setCaption((prev) => (prev ? prev + "\n\n" : "") + extractedTexts.join("\n\n---\n\n"));
+      toast({ title: "Teks Diekstrak", description: `Teks dari ${imageFiles.length} gambar berhasil ditambahkan.` });
     } catch (err: any) {
       console.error(err);
       toast({ title: "Error", description: err.message || "Gagal mengekstrak teks.", variant: "destructive" });
