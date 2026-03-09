@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Search, History, Edit, Trash2, Calendar, LogOut, Plus } from "lucide-react";
+import { FileText, Search, History, Edit, Trash2, Calendar, LogOut, Plus, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
