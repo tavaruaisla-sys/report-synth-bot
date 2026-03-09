@@ -11,9 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { briefService, DBBrief } from "@/services/briefService";
-import {
-  Zap, Copy, RefreshCw, Minimize2, Upload, ImageIcon, Trash2, Clock, Loader2, ExternalLink,
-} from "lucide-react";
+import { Zap, Copy, RefreshCw, Minimize2, Upload, ImageIcon, Trash2, Clock, Loader2, ExternalLink, X } from "lucide-react";
 import { format } from "date-fns";
 
 const PLATFORMS = [
