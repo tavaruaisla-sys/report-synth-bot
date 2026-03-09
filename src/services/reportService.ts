@@ -16,11 +16,11 @@ export const reportService = {
     try {
       const { data, error } = await supabase
         .from('reports')
-        .insert({
+        .insert([{
           title: reportData.reportTitle,
           brand_name: reportData.brandName,
-          data: reportData as unknown as Record<string, unknown>,
-        })
+          data: JSON.parse(JSON.stringify(reportData)),
+        }])
         .select()
         .single();
 
