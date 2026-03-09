@@ -114,17 +114,18 @@ export default function IssueBriefPage() {
     else setIsGenerating(true);
 
     try {
-      let imageUrl: string | undefined;
-      if (imageFile && imagePreview) {
-        const fileName = `brief-${Date.now()}-${imageFile.name}`;
+      const imageUrls: string[] = [];
+      for (const file of imageFiles) {
+        const fileName = `brief-${Date.now()}-${file.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("report-images")
-          .upload(fileName, imageFile);
+          .upload(fileName, file);
         if (!uploadError && uploadData) {
           const { data: urlData } = supabase.storage.from("report-images").getPublicUrl(uploadData.path);
-          imageUrl = urlData.publicUrl;
+          imageUrls.push(urlData.publicUrl);
         }
       }
+      const imageUrl = imageUrls.length > 0 ? imageUrls[0] : undefined;
 
       const { data, error } = await supabase.functions.invoke("generate-brief", {
         body: { platform, post_url: postUrl, caption, hashtags, top_comments: topComments, image_url: imageUrl, keyword, simplify },
