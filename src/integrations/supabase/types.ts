@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      issue_briefs: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          generated_brief: string
+          id: string
+          issue_summary: string | null
+          platform: string
+          post_caption: string | null
+          post_url: string | null
+          simplified_brief: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string
+          generated_brief: string
+          id?: string
+          issue_summary?: string | null
+          platform: string
+          post_caption?: string | null
+          post_url?: string | null
+          simplified_brief?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          generated_brief?: string
+          id?: string
+          issue_summary?: string | null
+          platform?: string
+          post_caption?: string | null
+          post_url?: string | null
+          simplified_brief?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           brand_name: string
