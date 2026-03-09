@@ -11,9 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { briefService, DBBrief } from "@/services/briefService";
-import {
-  Zap, Copy, RefreshCw, Minimize2, Upload, ImageIcon, Trash2, Clock, Loader2, ExternalLink,
-} from "lucide-react";
+import { Zap, Copy, RefreshCw, Minimize2, Upload, ImageIcon, Trash2, Clock, Loader2, ExternalLink, X } from "lucide-react";
 import { format } from "date-fns";
 
 const PLATFORMS = [
@@ -30,8 +28,8 @@ export default function IssueBriefPage() {
   const [keyword, setKeyword] = useState("");
   const [hashtags, setHashtags] = useState("");
   const [topComments, setTopComments] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
 
   // Output state
@@ -55,34 +53,45 @@ export default function IssueBriefPage() {
     setIsLoadingHistory(false);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setImageFiles((prev) => [...prev, ...files]);
+    setImagePreviews((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
   };
 
-  const extractTextFromImage = async () => {
-    if (!imageFile) return;
+  const removeImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const extractTextFromImages = async () => {
+    if (!imageFiles.length) return;
     setIsExtracting(true);
     try {
-      const fileName = `brief-${Date.now()}-${imageFile.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("report-images")
-        .upload(fileName, imageFile);
-      if (uploadError) throw uploadError;
+      const extractedTexts: string[] = [];
+      for (const file of imageFiles) {
+        const fileName = `brief-${Date.now()}-${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("report-images")
+          .upload(fileName, file);
+        if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage.from("report-images").getPublicUrl(uploadData.path);
-      const imageUrl = urlData.publicUrl;
+        const { data: urlData } = supabase.storage.from("report-images").getPublicUrl(uploadData.path);
 
-      const { data, error } = await supabase.functions.invoke("extract-image-text", {
-        body: { image_url: imageUrl },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+        const { data, error } = await supabase.functions.invoke("extract-image-text", {
+          body: { image_url: urlData.publicUrl },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        extractedTexts.push(data.extracted_text);
+      }
 
-      setCaption((prev) => (prev ? prev + "\n\n" : "") + data.extracted_text);
-      toast({ title: "Teks Diekstrak", description: "Teks dari gambar berhasil ditambahkan ke caption." });
+      setCaption((prev) => (prev ? prev + "\n\n" : "") + extractedTexts.join("\n\n---\n\n"));
+      toast({ title: "Teks Diekstrak", description: `Teks dari ${imageFiles.length} gambar berhasil ditambahkan.` });
     } catch (err: any) {
       console.error(err);
       toast({ title: "Error", description: err.message || "Gagal mengekstrak teks.", variant: "destructive" });
@@ -96,7 +105,7 @@ export default function IssueBriefPage() {
       toast({ title: "Platform wajib dipilih", variant: "destructive" });
       return;
     }
-    if (!caption && !imageFile) {
+    if (!caption && !imageFiles.length) {
       toast({ title: "Isi caption atau upload gambar", variant: "destructive" });
       return;
     }
@@ -105,17 +114,18 @@ export default function IssueBriefPage() {
     else setIsGenerating(true);
 
     try {
-      let imageUrl: string | undefined;
-      if (imageFile && imagePreview) {
-        const fileName = `brief-${Date.now()}-${imageFile.name}`;
+      const imageUrls: string[] = [];
+      for (const file of imageFiles) {
+        const fileName = `brief-${Date.now()}-${file.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("report-images")
-          .upload(fileName, imageFile);
+          .upload(fileName, file);
         if (!uploadError && uploadData) {
           const { data: urlData } = supabase.storage.from("report-images").getPublicUrl(uploadData.path);
-          imageUrl = urlData.publicUrl;
+          imageUrls.push(urlData.publicUrl);
         }
       }
+      const imageUrl = imageUrls.length > 0 ? imageUrls[0] : undefined;
 
       const { data, error } = await supabase.functions.invoke("generate-brief", {
         body: { platform, post_url: postUrl, caption, hashtags, top_comments: topComments, image_url: imageUrl, keyword, simplify },
@@ -225,22 +235,35 @@ export default function IssueBriefPage() {
                 <Input placeholder="#contoh #hashtag" value={hashtags} onChange={(e) => setHashtags(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Upload Screenshot <span className="text-muted-foreground">(opsional)</span></Label>
+                <Label>Upload Screenshot <span className="text-muted-foreground">(opsional, bisa multiple)</span></Label>
                 <div className="flex gap-2">
                   <label className="flex-1 flex items-center gap-2 px-3 py-2 border rounded-md cursor-pointer hover:bg-accent/50 transition-colors text-sm text-muted-foreground">
                     <ImageIcon className="h-4 w-4" />
-                    {imageFile ? imageFile.name : "Pilih gambar..."}
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                    {imageFiles.length > 0 ? `${imageFiles.length} gambar dipilih` : "Pilih gambar..."}
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
                   </label>
-                  {imageFile && (
-                    <Button variant="outline" size="sm" onClick={extractTextFromImage} disabled={isExtracting}>
+                  {imageFiles.length > 0 && (
+                    <Button variant="outline" size="sm" onClick={extractTextFromImages} disabled={isExtracting}>
                       {isExtracting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                       Ekstrak
                     </Button>
                   )}
                 </div>
-                {imagePreview && (
-                  <img src={imagePreview} alt="Preview" className="mt-2 rounded-lg max-h-40 object-cover border" />
+                {imagePreviews.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {imagePreviews.map((src, i) => (
+                      <div key={i} className="relative group">
+                        <img src={src} alt={`Preview ${i + 1}`} className="rounded-lg h-24 w-24 object-cover border" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(i)}
+                          className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
