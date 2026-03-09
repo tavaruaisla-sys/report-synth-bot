@@ -1,185 +1,116 @@
 
-# Plan: Generate PDF Report dengan Template RP Report
 
-## Ringkasan
+## Issue Brief Generator -- Implementation Plan
 
-Berdasarkan template PDF yang kamu upload, saya akan membuat fitur PDF generator yang menghasilkan laporan monitoring reputasi dengan format slide profesional. Laporan akan berisi:
+### Overview
+A new single-page tool accessible at `/brief` that lets the monitoring team paste social media post content (text, URL, image) and generate a short WhatsApp-style situational brief in Bahasa Indonesia using AI. Briefs are stored in a new `issue_briefs` Supabase table.
 
-1. **Cover Slide** - Judul "RP REPORT" dengan tanggal update
-2. **Executive Summary** - Status recovery dengan ringkasan News & Social Media
-3. **Section Divider** - "RESULTS"
-4. **Screenshot Hasil Pencarian** - Before/After comparison Google Search
-5. **AI Summary** - Ringkasan analisis keyword menggunakan AI (Perplexity style)
-6. **Counter Narrative** - Artikel positif sebagai counter
-7. **Appendix** - Data statistik, link produksi konten (News & Social Media)
-
----
-
-## Data yang Diperlukan (Sinkronisasi dengan Fitur Existing)
-
-### Dari Fitur Existing:
-| Data | Sumber | Status |
-|------|--------|--------|
-| Keywords Brand | KeywordInput component | Sudah ada |
-| Negative Keywords | KeywordInput component | Sudah ada |
-| Search Results (Google All/News) | google-search edge function | Sudah ada |
-| Sentiment Stats | useGoogleSearch hook | Sudah ada |
-| Social Media URLs | SocialMediaInput component | Sudah ada |
-
-### Data Baru yang Perlu Ditambahkan:
-| Data | Kegunaan | Cara Mendapatkan |
-|------|----------|------------------|
-| Screenshot SERP Before/After | Slide 4-5 comparison | Firecrawl screenshot API |
-| AI Analysis Summary | Slide 6-7 ringkasan | Perplexity AI API |
-| Counter Content Links | Slide Appendix | Input manual dari user |
-| Social Media Stats | Views, engagement | Input manual atau API scraping |
-
----
-
-## Struktur Slide PDF (Berdasarkan Template)
+### Architecture
 
 ```text
-+------------------------------------------+
-|  SLIDE 1: COVER                          |
-|  - Logo/Brand Name                       |
-|  - "RP REPORT"                           |
-|  - Update Date                           |
-+------------------------------------------+
-|  SLIDE 2: EXECUTIVE SUMMARY              |
-|  - News/Pemberitaan Status               |
-|  - Social Media Activity                 |
-|  - Counter Activity Stats                |
-+------------------------------------------+
-|  SLIDE 3: SECTION DIVIDER - "RESULTS"    |
-+------------------------------------------+
-|  SLIDE 4-5: SERP SCREENSHOTS             |
-|  - Before: Negative results visible      |
-|  - After: Clean SERP                     |
-+------------------------------------------+
-|  SLIDE 6-7: AI ANALYSIS                  |
-|  - Perplexity-style summary              |
-|  - Key findings with references          |
-+------------------------------------------+
-|  SLIDE 8: SECTION DIVIDER - "APPENDIX"   |
-+------------------------------------------+
-|  SLIDE 9: DATA SUMMARY TABLE             |
-|  - Keyword-wise negative count           |
-|  - Content production stats              |
-+------------------------------------------+
-|  SLIDE 10-19: PRODUCTION LINKS           |
-|  - News articles published               |
-|  - Social media posts grid               |
-+------------------------------------------+
+┌─────────────────────────────────────────┐
+│  /brief  (IssueBriefPage)               │
+│                                         │
+│  ┌─ Input Section ────────────────────┐ │
+│  │ Platform dropdown                  │ │
+│  │ Post URL input                     │ │
+│  │ Caption/Text textarea              │ │
+│  │ Hashtags (optional)                │ │
+│  │ Top Comments (optional textarea)   │ │
+│  │ Image upload (optional, via        │ │
+│  │   Supabase storage + AI extract)   │ │
+│  └────────────────────────────────────┘ │
+│                                         │
+│  [Generate Brief] button                │
+│                                         │
+│  ┌─ Output Section ──────────────────┐  │
+│  │ WhatsApp-style brief card         │  │
+│  │ Status badge (Aman/Waspada/Perlu) │  │
+│  │ [Copy to WhatsApp] [Regenerate]   │  │
+│  │ [Simplify for Regi]               │  │
+│  └────────────────────────────────────┘ │
+│                                         │
+│  ┌─ Brief History ───────────────────┐  │
+│  │ List of past briefs from DB       │  │
+│  └────────────────────────────────────┘ │
+└─────────────────────────────────────────┘
 ```
 
----
+### Implementation Steps
 
-## Implementasi Teknis
+#### 1. Database: Create `issue_briefs` table
 
-### Phase 1: PDF Generator Core
-1. Install `jspdf` + `jspdf-autotable` untuk PDF generation
-2. Buat `src/lib/pdf/ReportPDFGenerator.ts` - kelas utama generator
-3. Buat slide templates sesuai struktur di atas
-4. Implementasi color scheme matching template (Navy Blue theme)
+Migration SQL:
+- Table with columns: `id` (uuid PK), `platform` (text), `post_url` (text), `post_caption` (text), `issue_summary` (text), `status` (text -- Aman/Waspada/Perlu Perhatian), `generated_brief` (text), `simplified_brief` (text, nullable), `created_at` (timestamptz), `created_by` (uuid, default auth.uid())
+- RLS policies: users can CRUD only their own rows (using `auth.uid() = created_by`)
 
-### Phase 2: Additional Data Collection
-1. Tambah input form untuk:
-   - Report Title (default: "RP REPORT")
-   - Brand Name
-   - Social Media Stats (Views, Likes, Comments, Shares)
-   - Counter Content URLs (untuk appendix)
+#### 2. Edge Function: `generate-brief/index.ts`
 
-2. Buat edge function baru:
-   - `screenshot-serp` - Capture Google SERP screenshots
-   - `ai-summary` - Generate AI summary menggunakan Perplexity
+- Accepts: `platform`, `post_url`, `caption`, `hashtags`, `top_comments`, `image_url` (optional, if user uploaded screenshot)
+- Uses Lovable AI Gateway (`google/gemini-3-flash-preview`) with a carefully crafted system prompt that:
+  - Analyzes the post content for tone, narrative direction, mention of the target keyword/account
+  - Outputs the WhatsApp-style brief in the exact template format
+  - Returns JSON with `status`, `brief`, `issue_summary`
+- Second endpoint mode (`simplify: true`) generates the ultra-short single-paragraph version
+- Image analysis: if `image_url` is provided, pass it to Gemini as an image input for content extraction
+- Handles 429/402 errors properly
 
-### Phase 3: Integration
-1. Update `AnalysisPreview.tsx` - tombol "Generate Report PDF" aktif
-2. Buat `ReportPreview.tsx` - preview sebelum generate
-3. Buat modal untuk input data tambahan sebelum generate
+#### 3. Edge Function: `extract-image-text/index.ts`
 
-### Phase 4: Screenshot & AI Features
-1. Firecrawl screenshot integration untuk SERP capture
-2. Perplexity API integration untuk AI summary
-3. Auto-generate ringkasan dari search results
+- Accepts an image (base64 or URL from Supabase storage)
+- Uses Gemini vision to extract text/content from screenshot
+- Returns extracted text that gets populated into the caption field
 
----
+#### 4. Frontend: `src/pages/IssueBriefPage.tsx`
 
-## File yang Akan Dibuat/Dimodifikasi
+- Single-page layout with Header
+- Input form with all fields (platform dropdown, URL, caption textarea, hashtags, comments, image upload)
+- Image upload uses existing `report-images` storage bucket
+- "Generate Brief" button calls the edge function
+- Output card styled like a WhatsApp message bubble (green-ish bg, rounded, monospace-like)
+- Status badge with color coding: green (Aman), yellow (Waspada), red (Perlu Perhatian)
+- "Copy to WhatsApp" -- copies plain text to clipboard
+- "Regenerate" -- re-calls the edge function
+- "Simplify for Regi" -- calls edge function with simplify flag, shows simplified version
+- Brief history section at bottom showing past briefs from `issue_briefs` table
 
-### File Baru:
-- `src/lib/pdf/ReportPDFGenerator.ts` - Core PDF generator
-- `src/lib/pdf/SlideTemplates.ts` - Template untuk setiap slide
-- `src/lib/pdf/types.ts` - TypeScript types untuk report data
-- `src/components/report/ReportDataForm.tsx` - Form input data tambahan
-- `src/components/report/ReportPreviewModal.tsx` - Preview sebelum generate
-- `src/hooks/useReportGenerator.ts` - Hook untuk manage report state
-- `supabase/functions/screenshot-serp/index.ts` - Screenshot edge function
-- `supabase/functions/ai-summary/index.ts` - AI summary edge function
+#### 5. Frontend: Service layer `src/services/briefService.ts`
 
-### File yang Dimodifikasi:
-- `src/pages/Index.tsx` - Integrasi form dan preview
-- `src/components/report/AnalysisPreview.tsx` - Enable PDF button
-- `package.json` - Tambah jspdf dependency
+- CRUD operations for `issue_briefs` table via Supabase client
+- `createBrief`, `getBriefs`, `deleteBrief`
 
----
+#### 6. Routing & Navigation
 
-## Flow User Experience
+- Add `/brief` route in `App.tsx` (protected)
+- Add "Issue Brief" nav button in `Header.tsx` with a lightning/zap icon
 
-```text
-1. User input keywords brand + negative keywords (EXISTING)
-               |
-               v
-2. User pilih sumber pencarian (EXISTING)
-               |
-               v
-3. User klik "Mulai Analisis" (EXISTING)
-               |
-               v
-4. Sistem scraping Google & analisis (EXISTING)
-               |
-               v
-5. Hasil ditampilkan di SearchResults (EXISTING)
-               |
-               v
-6. User klik "Generate Report PDF" (NEW)
-               |
-               v
-7. Modal muncul: Input data tambahan (NEW)
-   - Report title & date
-   - Social media stats
-   - Counter content links
-               |
-               v
-8. User klik "Generate" (NEW)
-               |
-               v
-9. PDF di-download otomatis (NEW)
-```
+### AI Prompt Design
 
----
+The system prompt will instruct the model to:
+- Analyze in context of digital reputation monitoring
+- Use the exact output template provided in the spec
+- Determine status using the logic rules (Aman/Waspada/Perlu Perhatian)
+- Keep output to 5-6 lines max
+- Write in Bahasa Indonesia, natural WhatsApp tone
+- The keyword/account being monitored is taken from user input (not hardcoded to "Arsjad Rasjid")
 
-## Pertanyaan Klarifikasi
+### Tech Stack
+- **AI**: Lovable AI Gateway (Gemini 3 Flash Preview) -- free, already configured with `LOVABLE_API_KEY`
+- **Image extraction**: Same Gemini model with vision capability
+- **Storage**: Existing `report-images` bucket for screenshot uploads
+- **Database**: New `issue_briefs` table with RLS
+- **No external APIs needed** -- fully powered by existing Lovable AI
 
-Sebelum implementasi, ada beberapa hal yang perlu dikonfirmasi:
+### Files to Create/Modify
 
-1. **Screenshot SERP**: Apakah screenshot Before/After akan diinput manual (upload gambar) atau sistem harus auto-capture dari Google?
+| File | Action |
+|---|---|
+| `supabase/migrations/xxx_create_issue_briefs.sql` | Create table + RLS |
+| `supabase/functions/generate-brief/index.ts` | AI brief generation |
+| `supabase/functions/extract-image-text/index.ts` | Image text extraction |
+| `supabase/config.toml` | Add new function configs |
+| `src/pages/IssueBriefPage.tsx` | Main page component |
+| `src/services/briefService.ts` | DB service layer |
+| `src/App.tsx` | Add route |
+| `src/components/layout/Header.tsx` | Add nav button |
 
-2. **AI Summary**: Apakah ingin menggunakan AI (Perplexity/OpenAI) untuk generate summary, atau summary akan diinput manual?
-
-3. **Social Media Stats**: Apakah data Views/Likes/Comments akan diinput manual atau perlu scraping otomatis dari platform?
-
-4. **Counter Content**: Apakah link artikel counter akan diinput manual atau diambil dari database?
-
----
-
-## Timeline Estimasi
-
-| Phase | Deskripsi | Kompleksitas |
-|-------|-----------|--------------|
-| Phase 1 | PDF Generator Core + Templates | Medium |
-| Phase 2 | Form Input Data Tambahan | Low |
-| Phase 3 | Integration dengan existing features | Medium |
-| Phase 4 | Screenshot & AI Features | High |
-
-Rekomendasi: Mulai dengan Phase 1-3 dulu (manual input), kemudian tambahkan Phase 4 (automation) setelah core sudah berjalan.
