@@ -66,6 +66,23 @@ export function ReportHistory({ onLoadReport }: ReportHistoryProps) {
     }
   };
 
+  const handleCreateDummy = async () => {
+    setIsLoading(true);
+    try {
+      const saved = await reportService.createReport(dummyReportData);
+      if (saved) {
+        toast({ title: "Dummy Report Created", description: "Sample report with all slides filled." });
+        await fetchReports();
+      } else {
+        toast({ title: "Error", description: "Failed to create dummy report.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to create dummy report.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
