@@ -30,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
   const [reports, setReports] = useState<DBReport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
