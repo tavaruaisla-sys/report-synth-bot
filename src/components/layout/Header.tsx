@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Search, History, Edit, Trash2, Calendar, LogOut, Plus } from "lucide-react";
+import { FileText, Search, History, Edit, Trash2, Calendar, LogOut, Plus, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -104,6 +104,11 @@ const Header = () => {
           <Button variant="ghost" size="sm" className="gap-2" onClick={() => navigate("/report")}>
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">Report</span>
+          </Button>
+
+          <Button variant="ghost" size="sm" className="gap-2" onClick={() => navigate("/brief")}>
+            <Zap className="h-4 w-4" />
+            <span className="hidden sm:inline">Issue Brief</span>
           </Button>
 
           <Sheet open={isOpen} onOpenChange={handleOpenChange}>
