@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.generate-news-description]
 verify_jwt = false
+
+[functions.generate-brief]
+verify_jwt = false
+
+[functions.extract-image-text]
+verify_jwt = false
