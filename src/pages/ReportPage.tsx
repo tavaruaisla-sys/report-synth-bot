@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,6 @@ import Header from "@/components/layout/Header";
 import ReportDataForm from "@/components/report/ReportDataForm";
 import { useReportGenerator } from "@/hooks/useReportGenerator";
 import { useGoogleSearch } from "@/hooks/useGoogleSearch";
-import { ReportHistory } from "@/components/report/ReportHistory";
 
 interface GoogleScreenshot {
   file: File;
@@ -32,6 +31,22 @@ const ReportPage = () => {
     searchStats: initialState.searchStats || stats,
   });
 
+  // Load saved report from history if navigated from Header
+  useEffect(() => {
+    const loadReportData = sessionStorage.getItem("loadReportData");
+    const loadReportId = sessionStorage.getItem("loadReportId");
+    if (loadReportData && loadReportId) {
+      try {
+        const data = JSON.parse(loadReportData);
+        reportGenerator.loadReport({ id: loadReportId, data, title: data.reportTitle || '', brand_name: data.brandName || '', created_at: '', updated_at: '' });
+      } catch (e) {
+        console.error("Failed to load report from history:", e);
+      }
+      sessionStorage.removeItem("loadReportData");
+      sessionStorage.removeItem("loadReportId");
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
@@ -53,7 +68,6 @@ const ReportPage = () => {
             >
               {reportGenerator.isGenerating ? "Exporting..." : "Export PDF"}
             </Button>
-            <ReportHistory onLoadReport={reportGenerator.loadReport} />
           </div>
         </div>
       </div>

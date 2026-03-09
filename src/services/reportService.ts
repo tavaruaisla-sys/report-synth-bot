@@ -12,16 +12,15 @@ export interface DBReport {
 }
 
 export const reportService = {
-  // Create a new report
   async createReport(reportData: ReportData): Promise<DBReport | null> {
     try {
       const { data, error } = await supabase
         .from('reports')
-        .insert({
+        .insert([{
           title: reportData.reportTitle,
           brand_name: reportData.brandName,
-          data: reportData,
-        })
+          data: JSON.parse(JSON.stringify(reportData)),
+        }])
         .select()
         .single();
 
@@ -30,14 +29,13 @@ export const reportService = {
         return null;
       }
 
-      return data as DBReport;
+      return data as unknown as DBReport;
     } catch (error) {
       console.error('Unexpected error creating report:', error);
       return null;
     }
   },
 
-  // Update an existing report
   async updateReport(id: string, reportData: ReportData): Promise<DBReport | null> {
     try {
       const { data, error } = await supabase
@@ -45,7 +43,7 @@ export const reportService = {
         .update({
           title: reportData.reportTitle,
           brand_name: reportData.brandName,
-          data: reportData,
+          data: JSON.parse(JSON.stringify(reportData)),
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
@@ -57,14 +55,13 @@ export const reportService = {
         return null;
       }
 
-      return data as DBReport;
+      return data as unknown as DBReport;
     } catch (error) {
       console.error('Unexpected error updating report:', error);
       return null;
     }
   },
 
-  // Get all reports
   async getReports(): Promise<DBReport[]> {
     try {
       const { data, error } = await supabase
@@ -77,14 +74,13 @@ export const reportService = {
         return [];
       }
 
-      return data as DBReport[];
+      return (data ?? []) as unknown as DBReport[];
     } catch (error) {
       console.error('Unexpected error fetching reports:', error);
       return [];
     }
   },
 
-  // Get a single report by ID
   async getReportById(id: string): Promise<DBReport | null> {
     try {
       const { data, error } = await supabase
@@ -98,14 +94,13 @@ export const reportService = {
         return null;
       }
 
-      return data as DBReport;
+      return data as unknown as DBReport;
     } catch (error) {
       console.error('Unexpected error fetching report:', error);
       return null;
     }
   },
 
-  // Delete a report
   async deleteReport(id: string): Promise<boolean> {
     try {
       const { error } = await supabase
@@ -125,16 +120,14 @@ export const reportService = {
     }
   },
 
-  // Upload image to Supabase Storage
   async uploadImage(file: File): Promise<string | null> {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('report-images')
-        .upload(filePath, file);
+        .upload(fileName, file);
 
       if (uploadError) {
         console.error('Error uploading image:', uploadError);
@@ -143,7 +136,7 @@ export const reportService = {
 
       const { data } = supabase.storage
         .from('report-images')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
       return data.publicUrl;
     } catch (error) {
