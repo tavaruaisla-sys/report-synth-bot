@@ -235,22 +235,35 @@ export default function IssueBriefPage() {
                 <Input placeholder="#contoh #hashtag" value={hashtags} onChange={(e) => setHashtags(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Upload Screenshot <span className="text-muted-foreground">(opsional)</span></Label>
+                <Label>Upload Screenshot <span className="text-muted-foreground">(opsional, bisa multiple)</span></Label>
                 <div className="flex gap-2">
                   <label className="flex-1 flex items-center gap-2 px-3 py-2 border rounded-md cursor-pointer hover:bg-accent/50 transition-colors text-sm text-muted-foreground">
                     <ImageIcon className="h-4 w-4" />
-                    {imageFile ? imageFile.name : "Pilih gambar..."}
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                    {imageFiles.length > 0 ? `${imageFiles.length} gambar dipilih` : "Pilih gambar..."}
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
                   </label>
-                  {imageFile && (
-                    <Button variant="outline" size="sm" onClick={extractTextFromImage} disabled={isExtracting}>
+                  {imageFiles.length > 0 && (
+                    <Button variant="outline" size="sm" onClick={extractTextFromImages} disabled={isExtracting}>
                       {isExtracting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                       Ekstrak
                     </Button>
                   )}
                 </div>
-                {imagePreview && (
-                  <img src={imagePreview} alt="Preview" className="mt-2 rounded-lg max-h-40 object-cover border" />
+                {imagePreviews.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {imagePreviews.map((src, i) => (
+                      <div key={i} className="relative group">
+                        <img src={src} alt={`Preview ${i + 1}`} className="rounded-lg h-24 w-24 object-cover border" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(i)}
+                          className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
