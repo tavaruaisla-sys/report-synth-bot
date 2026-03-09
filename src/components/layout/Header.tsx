@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Search, Settings, History, Edit, Trash2, Calendar } from "lucide-react";
+import { FileText, Search, Settings, History, Edit, Trash2, Calendar, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -29,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
   const [reports, setReports] = useState<DBReport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -161,9 +163,12 @@ const Header = () => {
             </SheetContent>
           </Sheet>
 
-          <Button variant="ghost" size="icon">
-            <Settings className="h-4 w-4" />
-          </Button>
+          {user && (
+            <Button variant="ghost" size="sm" className="gap-2 text-destructive hover:text-destructive" onClick={async () => { await signOut(); navigate("/auth"); }}>
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Keluar</span>
+            </Button>
+          )}
         </nav>
       </div>
     </header>
