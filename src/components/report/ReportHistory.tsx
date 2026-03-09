@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
-import { FileText, Trash2, Edit, Calendar } from "lucide-react";
+import { FileText, Trash2, Edit, Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { reportService, DBReport } from "@/services/reportService";
 import { useToast } from "@/hooks/use-toast";
+import { dummyReportData } from "@/lib/dummyReportData";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -65,6 +66,23 @@ export function ReportHistory({ onLoadReport }: ReportHistoryProps) {
     }
   };
 
+  const handleCreateDummy = async () => {
+    setIsLoading(true);
+    try {
+      const saved = await reportService.createReport(dummyReportData);
+      if (saved) {
+        toast({ title: "Dummy Report Created", description: "Sample report with all slides filled." });
+        await fetchReports();
+      } else {
+        toast({ title: "Error", description: "Failed to create dummy report.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to create dummy report.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -81,7 +99,14 @@ export function ReportHistory({ onLoadReport }: ReportHistoryProps) {
           </SheetDescription>
         </SheetHeader>
         
-        <ScrollArea className="h-[calc(100vh-120px)] mt-6 pr-4">
+        <div className="mt-4">
+          <Button variant="outline" size="sm" onClick={handleCreateDummy} disabled={isLoading}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Dummy Report
+          </Button>
+        </div>
+
+        <ScrollArea className="h-[calc(100vh-180px)] mt-4 pr-4">
           {isLoading ? (
             <div className="flex justify-center items-center h-20 text-sm text-muted-foreground">
               Loading...
