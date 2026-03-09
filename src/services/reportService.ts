@@ -43,7 +43,7 @@ export const reportService = {
         .update({
           title: reportData.reportTitle,
           brand_name: reportData.brandName,
-          data: reportData as unknown as Record<string, unknown>,
+          data: JSON.parse(JSON.stringify(reportData)),
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
